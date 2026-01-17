@@ -7,7 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 **Kaumei&nbsp;JDBC** aims to give teams the control of hand-written SQL with improved safety,
 ergonomics, and observability compared to heavier frameworks.
 It keeps SQL front and center while compiling the boring JDBC plumbing for you.
-The docs for the latest release live at https://kaumei-jdbc.kaumei.io.
+
+* Release documentation: https://kaumei-jdbc.kaumei.io.
+* Preview documentation (may change): https://kaumei.github.io/kaumei-jdbc/.
 
 The project is under active development — APIs may change, and feedback is welcome.
 Initial targets:

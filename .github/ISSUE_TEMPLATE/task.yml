@@ -31,5 +31,3 @@ body:
     id: notes
     attributes:
       label: Notes
-      validations:
-        required: false
