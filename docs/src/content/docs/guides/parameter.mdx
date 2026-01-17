@@ -1,0 +1,132 @@
+---
+title: SQL parameter
+description: A guide to use SQL update
+---
+import { Code } from '@astrojs/starlight/components';
+import { extractCodePart } from '../utils.ts';
+//import basicApi               from '/root/README.md'; //'/root/jdbc-examples/src/main/java/io/kaumei/jdbc/examples/docs/param/BasicApi.java?raw';
+//import namedApi               from '/root/README.md'; //'/root/jdbc-examples/src/main/java/io/kaumei/jdbc/examples/docs/param/NamedApi.java?raw';
+//import LocalOverwriteApi      from '/root/README.md'; //'/root/jdbc-examples/src/main/java/io/kaumei/jdbc/examples/docs/param/LocalOverwriteApi.java?raw';
+//import recordApi              from '/root/README.md'; //'/root/jdbc-examples/src/main/java/io/kaumei/jdbc/examples/docs/param/RecordApi.java?raw';
+//import simpleApi              from '/root/README.md'; //'/root/jdbc-examples/src/main/java/io/kaumei/jdbc/examples/docs/param/SimpleApi.java?raw';
+//import simpleStaticApi        from '/root/README.md'; //'/root/jdbc-examples/src/main/java/io/kaumei/jdbc/examples/docs/param/SimpleStaticApi.java?raw';
+//import statementApi           from '/root/README.md'; //'/root/jdbc-examples/src/main/java/io/kaumei/jdbc/examples/docs/param/StatementApi.java?raw';
+//import collectionParameterApi from '/root/README.md'; //'/root/jdbc-examples/src/main/java/io/kaumei/jdbc/examples/docs/param/CollectionParameterApi.java?raw';
+
+For all JDBC basic types and all other not natively supported JDBC types we need a Java-to-JDBC converter. 
+In general the annotations process will only convert values if the convert is exact defined and unique.
+
+
+## Basic JDBC types
+* All types which can be set in the `PreparedStatement` directly. 
+* Some JDBc driver do not support all types, please check the documentation of your driver.
+
+Supported types from `java.sql.PreparedStatement` are
+* `boolean`,
+* `byte[]`,
+* `byte`, `short`, `int`, `long`, `float`, `double`, `java.math.BigDecimal`
+* `java.lang.Object` (will call `setObject` from PreparedStatement)
+* `java.lang.String`,
+* `java.net.URL`,
+* `java.sql.Date`, `java.sql.Time`, `java.sql.Timestamp`,
+* `java.sql.Blob`, `java.sql.Clob`, `java.sql.NClob`,
+* `java.sql.Ref`, `java.sql.RowId`,
+* `java.sql.SQLXML`,
+
+In additional the following are supported by a default converter which maps to the underlaying `PreparedStatement` method
+* `java.lang.Boolean`
+* `java.lang.Byte`, `java.lang.Short`, `java.lang.Integer`, `java.lang.Long`, `java.lang.Float`, `java.lang.Double`
+* `char`, `java.lang.Character` converted to `java.lang.String`
+
+{/* <Code code={extractCodePart(basicApi, "BasicApi")} lang="java"/> */}
+
+## Record
+Record with one component are supported:
+* We support records, which have exactly one component which type is a Basic JDBC type.
+* The component must be not nullable.
+* Records with more than one component are not supported. Those types will show up as invalid.
+* You can overwrite this with a specific converter, which is described below.
+
+{/* <Code code={extractCodePart(recordApi, "RecordApi")} lang="java"/> */}
+
+## Simple converter
+A visible none static method in a Java class/record/enum, which fits the following:
+* the method is annotated with `@JavaToJdbc`
+* the method has no parameter
+* the return value is a basic JDBC type
+* the method may throws a `SQLException`
+* e.g. `JdbcType this.name() {}`
+
+{/* <Code code={extractCodePart(simpleApi, "SimpleApi")} lang="java"/> */}
+
+A visible static method in a Java interface/class/record/enum which fits the following:  
+* the method is annotated with `@JavaToJdbc` or it is defined in a `@JavaToJdbc` annotated class/interface/record
+* the method has exact one parameter with the given Java type
+* the return value is a basic JDBC type
+* the method may throws a `SQLException`
+* `JdbcType static.name(T value)`
+
+{/* <Code code={extractCodePart(simpleStaticApi, "SimpleStaticApi")} lang="java"/> */}
+
+## Statement converter
+A visible static method in a Java interface/class/record/enum which fits the following:  
+* the method is annotated with `@JavaToJdbc` or it is defined in a `@JavaToJdbc` annotated class/interface/record
+* the method has exact three parameters: `PreparedStatement`, `int`, `@Nullable T` 
+  * the last parameter must be annotated with @Nullable and must handle `null` values correctly
+* the return value is `void`
+* the method may throws a `SQLException`
+* `static void name(PreparedStatement stmt, int index, @Nullable T value)`, 
+
+{/* <Code code={extractCodePart(statementApi, "StatementApi")} lang="java"/> */}
+
+## Named converter
+A Named converter: With the annotation `@JavaToJdbc` you can give the converter a name. 
+In this case the converter is called a named converter, the others are called unnamed converter.
+The combination name and type must be unique.
+* Names are not supported at class/interface/record/enum level
+* To select a named convert, add @JavaToJdbc at a parameter and use the name of the target converter
+
+{/* <Code code={extractCodePart(namedApi, "NamedApi")} lang="java"/> */}
+
+## arrays and collections 
+Some times we need to hand over collections to the SQL statement, in case we want to do things like `id in (:ids)`.
+Every time the parameter is an `array` with one dimension or a collection like `Set`, `List` and so on.
+In this cases the `:ids` will replaced dynamic with the number of `?` equal to the size of the collection.
+
+{/*
+<Code code={extractCodePart(collectionParameterApi, "withArray")} lang="java"/>
+<Code code={extractCodePart(collectionParameterApi, "withList")} lang="java"/>
+*/}
+
+## Interface overwrite converter
+{/* <Code code={extractCodePart(LocalOverwriteApi, "OverwriteApi")} lang="java"/> */}
+
+## Further conditions for Java-To-JDBC converter
+* There can only be exactly one unnamed converter (`valid` or `invalid`) for a type.
+  If there are more than one converters the type is marked `invalid` 
+* A type may have any number of unique named converters (`valid` or `invalid`).
+  If there are more than one converters for a name, it is marked `invalid`
+* If an annotated method does not met the required signature (parameter/return value/throws):
+  * it is ignored, if there is no name and we could not find an associated type
+  * else the name/type is marked `invalid`
+* static global converter can be defined 
+  * with in the Java class/interface/record (preferred place) which them convert
+  * at any Java class/interface/record
+    * all static method will be treated as converter
+  * at any static method in any class/interface 
+    * annotated methods in a JDBC interface are treated different ⚠️
+    * see local converter
+  * if the method does not met the conditions it is flagged `invalid_scope`  
+* static local converter can be defined 
+  * in JDBC interfaces
+  * these converter are only visible locally and my overwrite global converter
+  * this applies to unnamed and named converter 
+* Converter for JDBC base types are not supported and will be flagged `invalid_type`
+* Any convert which is not flagged can be used, al other must not taken in account.
+
+To get the a Java-To-JDBC converter we search for the type (and if not found we travel the type hierarchy like Java)
+* in the context of the interface for a converter
+* in the global context
+* in the JDBC basic types
+* travel the type hierachy
+* default record, if available

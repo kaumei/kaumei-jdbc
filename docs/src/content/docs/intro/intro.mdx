@@ -1,0 +1,56 @@
+---
+title: Introduction
+description: Some warm words of the Kaumei JDBC project.
+---
+import Link from '../../../components/Link.astro';
+
+**Kaumei&nbsp;JDBC** is a Java library and annotation processor designed to simplify common SQL operations.
+It keeps JDBC access straightforward while keeping type safety and predictable performance.
+
+## Story & Positioning
+
+**Kaumei&nbsp;JDBC** targets teams that want the control of hand-written SQL with improved safety,
+ergonomics, and observability compared to heavier frameworks.
+It keeps SQL front and center while compiling the boring plumbing for you.
+
+### Problems we address
+* **Hidden work in ORMs**: Large frameworks create unpredictable SQL and runtime
+  reflection traps.
+* **Boilerplate in plain JDBC**: Manual mapping and error handling slow teams down
+  and duplicate logic.
+* **Inconsistent mapping layers**: Every project reinvents conversions between
+  domain types and SQL columns.
+
+### How **Kaumei&nbsp;JDBC** stands apart
+* **Compile-time checks**: Annotation processing generates DAO implementations
+  and validates bindings up front.
+* **No reflection in generated code**: Generated code is simple Java, so debuggers and
+  profilers show real call stacks.
+* **Explicit SQL, reusable mappers**: SQL stays in your codebase, converters are
+  shared via annotations, and nothing is recreated at runtime.
+* **Designed to be portable**: Works with most JDBC drivers and common DI/containers that can
+  wire interfaces.
+
+### Outcomes for adopters
+* Predictable database access paths that are easy to reason about during reviews
+  and incident response.
+* Faster onboarding—new engineers read SQL instead of deciphering meta frameworks.
+* More predictable performance in dev, test, and prod because the generated code
+  matches what runs in production.
+
+## How **Kaumei&nbsp;JDBC** works
+At build time the annotation processor inspects your DAO interfaces and SQL
+snippets.
+It validates parameters and generates strongly typed mapper classes.
+Those classes use plain JDBC, so at runtime you inject a `DataSource` and obtain a
+connection.
+You call the generated methods directly to execute your SQL.
+There is no container, session, or runtime registry, just the code your build
+already produced.
+
+## Learn more
+
+Need a deeper comparison or a checklist to decide if **Kaumei&nbsp;JDBC** fits your use
+case?
+See <Link ref="/intro/why-kaumei">Why **Kaumei&nbsp;JDBC**</Link> for details
+on alternatives, fit assessment, and trade-offs.

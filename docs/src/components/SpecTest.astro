@@ -1,0 +1,76 @@
+---
+import { extractCodePart } from "../content/docs/utils.ts";
+
+const specSources = import.meta.glob(
+  "/root/jdbc-processor-spec/src/test/java/**/*.java",
+  {
+    query: "?raw",
+    import: "default",
+  }
+);
+
+type VisibilityProp = boolean | string | undefined;
+
+interface Props {
+  test: string;
+  visible?: VisibilityProp;
+  marker?: string;
+}
+
+const props = Astro.props as Props;
+const normalizedTest = props.test.replace(/\./g, "/");
+const marker = props.marker ?? "spec";
+const relativeSlug = `jdbc-processor-spec/src/test/java/${normalizedTest}.java`;
+const globKey = `/root/${relativeSlug}`;
+
+const isVisible = (() => {
+  if (typeof props.visible === "string") {
+    return props.visible.toLowerCase() !== "false";
+  } else if (typeof props.visible === "boolean") {
+    return props.visible;
+  }
+  return false;
+})();
+
+let fileMissing = false;
+let snippet = "";
+let rawContent: string | null = null;
+
+const loader = specSources[globKey];
+if (loader) {
+  const loaded = typeof loader === "function" ? await loader() : loader;
+  rawContent = typeof loaded === "string" ? loaded : null;
+} else {
+  const spec2Sources = import.meta.glob(
+    "/root/jdbc-processor-spec2/src/test/java/**/*.java",
+    {
+      query: "?raw",
+      import: "default",
+    }
+  );
+  const key = `/root/jdbc-processor-spec2/src/test/java/${normalizedTest}.java`;
+  const loader = spec2Sources[key];
+  const loaded = typeof loader === "function" ? await loader() : loader;
+  rawContent = typeof loaded === "string" ? loaded : null;
+}
+
+if (rawContent === null) {
+  fileMissing = true;
+} else {
+  snippet = extractCodePart(rawContent, marker);
+}
+---
+
+{
+  fileMissing ? (
+    <span>
+      <code style="color: red;">❗️{props.test}</code>
+    </span>
+  ) : (
+    isVisible && (
+      <span>
+        <code>{props.test}</code>
+      </span>
+    )
+  )
+}

@@ -1,0 +1,52 @@
+---
+title: Integration overview
+description: Overview of integration
+---
+import { Code } from '@astrojs/starlight/components';
+import { extractCodePart } from '../utils.ts';
+import Link from '../../../components/Link.astro';
+import provider from '/root/jdbc-core/src/main/java/io/kaumei/jdbc/JdbcConnectionProvider.java?raw';
+import namesService from '/root/jdbc-integration/jdbc-spring/src/main/java/io/kaumei/jdbc/examples/spring/kaumei/NamesServiceKaumei.java?raw';
+
+**Kaumei&nbsp;JDBC** keeps runtime integration simple.
+Generated classes operate on a plain JDBC connection provided through a single interface.
+
+<Code
+  code={extractCodePart(provider, "JdbcConnectionProvider")}
+  lang="java"
+  title='JdbcConnectionProvider.java'
+/>
+
+The Spring example below illustrates the structure of a service interface as example:
+<Code
+  code={extractCodePart(namesService, "NamesServiceKaumei")}
+  lang="java"
+  title='NamesServiceKaumei.java'
+/>
+
+Each generated class exposes a constructor that accepts a `JdbcConnectionProvider`.
+Every DAO method borrows the current connection from that provider.
+
+```java
+@Generated(...)
+@Transactional
+@Service
+public class NamesServiceKaumeiJdbc implements NamesServiceKaumei {
+    private final JdbcConnectionProvider supplier;
+
+    @Autowired
+    public NamesServiceKaumeiJdbc(JdbcConnectionProvider supplier) {
+        this.supplier = Objects.requireNonNull(supplier,"supplier");
+    }
+    // ...
+}    
+```
+
+Provide an implementation that fits your framework.
+Wire it into your dependency injection container.
+These guides walk through common scenarios:
+
+* <Link ref="/integration/datasource">Spring `DataSource` integration</Link>
+* <Link ref="/integration/hibernate">Spring + Hibernate integration</Link>
+* <Link ref="/integration/jpa">Spring Data JPA integration</Link>
+

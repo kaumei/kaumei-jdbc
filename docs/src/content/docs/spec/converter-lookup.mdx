@@ -1,0 +1,15 @@
+---
+title: ❓ Converter lookup
+---
+import SpecTest from '../../../components/SpecTest.astro';
+
+Converter are discovered/searched in the following order:
+1) in the scope of the local interface (static methods annotated with `@JavaToJdbc` or `@JdbcToJava`)
+   The interface may be annotated with easer `@JavaToJdbc` or `@JdbcToJava` (not both).
+   In this case all static method which fit the converter definition will be taken in account.
+2) in the global scope, defined with in the `@JdbcConfig` or with `@JdbcConfig(converter={})`.
+   In the configuration you can define global reusable converter collections.
+3) in the type which is used
+   3.1) methods annotated with `@JavaToJdbc` or `@JdbcToJava`
+   3.2) default converter for Java record or enum
+4) Basic JDBC Types

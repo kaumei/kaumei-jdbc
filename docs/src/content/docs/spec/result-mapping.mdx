@@ -1,0 +1,98 @@
+---
+title: ✅ Result Mapping
+---
+import SpecTest from '../../../components/SpecTest.astro';
+
+The processing of results is done in two steps:
+* one row is converted into one Java object (class, record, enum, primitive)
+* depending on how man rows are expected 
+  * less or equal one: the created Java object is passed back
+  * more than one row is expected: a List/array is returned with every row is converted to a Java object
+* The converter will be selected by the return type of the Java method.
+* Java names are mapped to JDBC names as follows: 
+  * if the element is annotated with `@JdbcName`, the provided name is used
+  * if there is a case switch between two chars a '_' is inserted
+* Converter are search in the following order
+  * in the scope of the local interface (static methods annotated with `@JdbcToJava`)
+  * in the global scope, all other places (static `@JdbcToJava`)
+  * default converter for Java record, class or enum
+  * Basic JDBC types  
+* **Kaumei&nbsp;JDBC** support nullness sematic (see overview)
+  * Java `Optional<T>` is supported as return type, but it should be avoid in favour of `org.jspecify`
+* A Java type which is mapped to exact one column is a column Java type in this specification.
+  All other types are row related. 
+
+## ✅ JDBC basic types 
+<SpecTest test="io.kaumei.jdbc.spec.types.JdbcTypesColumnSpecTest" title="JDBC Types" /> 
+<SpecTest test="io.kaumei.jdbc.spec.types.JdbcTypesAdditionalColumnSpecTest" title="JDBC Additional Types" /> 
+<SpecTest test="io.kaumei.jdbc.spec.jdbc2java.ColumnTypeSpecTest" title="Test with H2 driver" />
+All JDBC basic types are column Java types.
+* The following JDBC Java types are mapped by default to the `ResultSet.get...` methods
+  * `java.lang.String`, `java.math.BigDecimal` `boolean`, `byte`, `short`, `int`, `long`, `float`, 
+    `double`, `byte[]`, `java.sql.Date`, `java.sql.Time`, `java.sql.Timestamp`, `java.sql.Clob`, 
+    `java.sql.Blob`, `java.sql.Array`, `java.sql.Ref`, `java.net.URL`, `java.sql.RowId`,
+    `java.sql.NClob`, `java.sql.SQLXML` 
+  * `java.sql.Struct` (via `getObject`)
+* In additional the following are supported by a default converter which maps to the 
+  underlying `ResultSet` method:
+  * `java.lang.Boolean`, `java.lang.Byte`, `java.lang.Short`, `java.lang.Integer`, 
+    `java.lang.Long`, `java.lang.Float`, `java.lang.Double`
+  * `char`, `java.lang.Character` (via `getString`)
+* Some JDBC driver do not support all types, please check the documentation of your driver.
+
+## ✅ Java default converter
+<SpecTest test="io.kaumei.jdbc.spec.jdbc2java.ColumnFromObjectFactorySpecTest" title="JDBC Types" />
+<SpecTest test="io.kaumei.jdbc.spec.jdbc2java.RowFromObjectsFactorySpecTest" title="JDBC Types" />
+*  Java record: by default the JDBC columns will be mapped to the components of the record
+  * ✅ Theses Java records are in general row related Java types.
+  * ✅ A Java record is a column Java type, if all match:
+    * the record has exact one component 
+    * the component is a column Java type 
+    * the component has no `@JdbcName` annotation
+* Java class: by the constructor, if it is unique and not the default one
+  * ✅ Theses Java classes are in general row related Java types.
+  * ✅ A Java classes is a column Java type, if all match:
+    * the constructor has exact one parameter 
+    * the parameter is a column Java type 
+    * the parameter has no `@JdbcName` annotation
+* ✅ Java enum: by the name of the enum
+  * it is a column Java type
+
+## ✅ Custom converter
+<SpecTest test="io.kaumei.jdbc.spec.jdbc2java.ColumnTypeNameSpecTest" />
+<SpecTest test="io.kaumei.jdbc.spec.jdbc2java.ColumnFromObjectSpecTest" />
+<SpecTest test="io.kaumei.jdbc.spec.jdbc2java.ColumnResultSetSpecTest" />
+<SpecTest test="io.kaumei.jdbc.spec.jdbc2java.RowFromObjectsSpecTest" />
+<SpecTest test="io.kaumei.jdbc.spec.jdbc2java.RowFromResultSetSpecTest" />
+The developer can define a column converter to convert a JDBC column into a column Java type
+* ✅ A static converter which converts a JDBC basic value `T` into a supported Java value `R`: 
+  `static R toJava(T value)`
+  * The method must be annotated with `@JdbcToJava`
+  * Parameter and return must be `unspecific` or `nonNull`.
+  * The method will never be called with `null` and must never return `null`.
+  * Only `RuntimeException`s and `SqlExceptions` are allowed.
+* ✅ A static converter which gets a value `R` from a given `ResultSet` and an `index`:
+  `static R columnToJava(ResultSet rs, int columnIndex) throws SQLException`
+  * The method must be annotated with `@JdbcToJava`
+  * parameter `ResultSet rs` must be `nonNull` or `unspecific`
+  * return must be `unspecific` or `nullable`.
+  * The method must handel `null` correctly. 
+  * `RuntimeException`s are allowed.
+  * The method must handel `null` correctly. 
+The developer can define a row converter to convert a JDBC row into a row Java type
+* ✅ A static convert which has all column Java types
+  * The method must be annotated with `@JdbcToJava`
+  * parameter must be all column Jaba Types
+  * parameter annotations `@JdbcName` are allowed
+  * parameter may `unspecifc`, `non-null` or `nullable`
+  * return must be `unspecific` or `non-null`.
+  * `RuntimeException`s are allowed.
+  * The method must handel `null` correctly. 
+* ✅ A static converter which gets a row value `R` from a given `ResultSet` 
+  and convert it into a row Java type: `static R rowToJava(ResultSet rs) throws SQLException`
+  * The method must be annotated with `@JdbcToJava`
+  * parameter `ResultSet rs` must be `non-null` or `unspecific`
+  * return must be `unspecific` or `non-null`.
+  * `RuntimeException`s are allowed.
+  * The method must handel `null` correctly. 
+

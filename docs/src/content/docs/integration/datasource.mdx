@@ -1,0 +1,41 @@
+---
+title: DataSource
+description: DataSource integration with Kaumei JDBC
+---
+import { Code } from '@astrojs/starlight/components';
+import { extractCodePart } from '../utils.ts';
+import provider from '/root/jdbc-integration/jdbc-spring/src/main/java/io/kaumei/jdbc/examples/spring/datasource/DatasourceConnectionProvider.java?raw';
+import config from '/root/jdbc-integration/jdbc-spring/src/main/java/io/kaumei/jdbc/examples/spring/datasource/SpringDatasourceConfig.java?raw';
+
+## Spring
+
+Use this integration when Spring already manages transactions through its `DataSource`.
+`DataSourceUtils.getConnection` yields the connection bound to the current transaction.
+Wrap it in a `JdbcConnectionProvider` and register it as a Spring bean:
+
+<Code
+  code={extractCodePart(provider, "datasource")}
+  lang="java"
+  title='DatasourceConnectionProvider.java'
+/>
+
+Inject the provider into your generated classes through the Spring configuration:
+
+<Code
+  code={extractCodePart(config, "datasource")}
+  lang="java"
+  title='SpringDatasourceConfig.java'
+/>
+
+### References
+
+* [Spring: Controlling database connections][spring-connections]
+* [Spring: Synchronising resources with transactions][spring-tx]
+
+## Other frameworks
+
+This approach has not yet been tested outside Spring.
+Any framework with a managed `DataSource` should be able to expose a similar provider.
+
+[spring-connections]: https://docs.spring.io/spring-framework/reference/data-access/jdbc/connections.html
+[spring-tx]: https://docs.spring.io/spring-framework/reference/data-access/transaction/tx-resource-synchronization.html

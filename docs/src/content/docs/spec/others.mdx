@@ -1,0 +1,40 @@
+---
+title: ✅ Additional annotations
+---
+import SpecTest from '../../../components/SpecTest.astro';
+
+## Interface configuration
+* `@JdbcConstructorAnnotations` defines additional annotations which should be added 
+  to the constructor of the generated class
+
+## Interface/Method configuration
+* `@JdbcDebug` for the annotated element the processor will enable 
+  extra debug logs (mainly needed for debugging purpose)
+
+## Statement configuration
+
+| Annotation                    | Select | Update | Batch | Default |
+| ----------------------------- | ------ | ------ | ----- | ------- |
+| `@JdbcBatchSize`              | ⛔️     | ⛔️      | ✅    | `1000`  |
+| `@JdbcFetchDirection`         | ✅     | ⛔️      | ⛔️    | unset   |
+| `@JdbcFetchSize`              | ✅     | ⛔️      | ⛔️    | unset   |
+| `@JdbcMaxRows`                | ✅     | ⛔️      | ⛔️    | unset   |
+| `@JdbcNoMoreRows`             | ✅     | ⛔️      | ⛔️    | `THROW_EXCEPTION` |
+| `@JdbcNoRows`                 | ✅     | ⛔️      | ⛔️    | `THROW_EXCEPTION` |
+| `@JdbcQueryTimeout`           | ✅     | ✅      | ✅    | unset   |
+| `@JdbcResultSetConcurrency`   | ⛔️     | ✅      | ⛔️    | unset   |
+| `@JdbcResultSetType`          | ⛔️     | ✅      | ⛔️    | unset   |
+| `@JdbcReturnGeneratedValues`  | ⛔️     | ✅      | ⛔️    | `GENERATED_KEYS` |
+
+<SpecTest title="@JdbcFetchDirection"        test="io.kaumei.jdbc.spec.select.SelectSpecTest" /> 
+<SpecTest title="@JdbcFetchSize"             test="io.kaumei.jdbc.spec.select.SelectSpecTest" /> 
+<SpecTest title="@JdbcMaxRows"               test="io.kaumei.jdbc.spec.select.SelectSpecTest" /> 
+<SpecTest title="@JdbcNoMoreRows"            test="io.kaumei.jdbc.spec.select.SelectValueSpecTest" /> 
+<SpecTest title="@JdbcNoRows"                test="io.kaumei.jdbc.spec.select.SelectValueSpecTest" /> 
+<SpecTest title="@JdbcResultSetConcurrency"  test="io.kaumei.jdbc.spec.select.SelectResultSetSpecTest" /> 
+<SpecTest title="@JdbcResultSetConcurrency"  test="io.kaumei.jdbc.spec.select.SelectSpecTest" /> 
+<SpecTest title="@JdbcResultSetType"         test="io.kaumei.jdbc.spec.select.SelectResultSetSpecTest" /> 
+<SpecTest title="@JdbcResultSetType"         test="io.kaumei.jdbc.spec.select.SelectSpecTest" /> 
+<SpecTest title="@JdbcBatchSize"             test="io.kaumei.jdbc.spec.update.UpdateBatchSpecTest" /> 
+<SpecTest title="@JdbcReturnGeneratedValues" test="io.kaumei.jdbc.spec.update.UpdateSpecTest" />
+

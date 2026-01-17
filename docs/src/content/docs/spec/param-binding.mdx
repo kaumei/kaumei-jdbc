@@ -1,0 +1,78 @@
+---
+title: ✅ Parameter Binding
+---
+import SpecTest from '../../../components/SpecTest.astro';
+
+<SpecTest test="io.kaumei.jdbc.spec.java2jdbc.ConverterStaticInvalidSpecTest" title="Statement" />
+
+{/* TODO we need some overview hier */}
+
+## ✅ Converter names
+<SpecTest test="io.kaumei.jdbc.spec.java2jdbc.ConverterNamesSpecTest" title="Converter Names" />
+Converter can get names, e.g. `@JavaToJdbc("name")`. 
+They can only be used by an annotation `@JdbcConverterName("name")` on a parameter.
+Names are unique per scope.
+
+## ✅ Marker  
+<SpecTest test="io.kaumei.jdbc.spec.java2jdbc.MarkerNamesSpecTest" title="Marker" />
+The Java method parameters are mapped by their names to the corresponding JDBC named parameter markers. 
+All JDBC named parameter markers must be defined in the Java method and vice versa.
+Too many or too few parameters will lead to errors.
+JDBC support '?' as parameter markers.
+**Kaumei&nbsp;JDBC** does not support '?'.
+It uses named parameter markers, every name is prefixed with ':', e.g. `:name`
+* Each `:name` must match a method parameter. Parameters that do not appear in SQL will generated an error.
+
+## ✅ JDBC basic types 
+<SpecTest test="io.kaumei.jdbc.spec.types.JdbcTypesParamSpecTest" title="JDBC Types" /> 
+<SpecTest test="io.kaumei.jdbc.spec.types.JdbcTypesAdditionalParamSpecTest" title="JDBC Additional Types" /> 
+The following JDBC Java types are mapped by default to the `PreparedStatement.set...` methods:
+* `java.lang.String`, `java.math.BigDecimal` `boolean`, `byte`, `short`, `int`, `long`, `float`, 
+  `double`, `byte[]`, `java.sql.Date`, `java.sql.Time`, `java.sql.Timestamp`, `java.sql.Clob`, 
+  `java.sql.Blob`, `java.sql.Array`, `java.sql.Ref`, `java.net.URL`, `java.sql.RowId`,
+  `java.sql.NClob`, `java.sql.SQLXML` 
+* `java.sql.Struct` (via `setObject`)
+* In additional the following are supported by a default converter which maps to the 
+   underlying `PreparedStatement` method:
+  * `java.lang.Boolean`, `java.lang.Byte`, `java.lang.Short`, `java.lang.Integer`,
+    `java.lang.Long`, `java.lang.Float`, `java.lang.Double`
+  * `char`, `java.lang.Character` (via `setString`)
+* Some JDBC driver do not support all native JDBC types, please check the documentation of your driver.
+
+## ✅ Java default converter
+<SpecTest test="io.kaumei.jdbc.spec.java2jdbc.ConverterRecordSpecTest" title="Record" />
+<SpecTest test="io.kaumei.jdbc.spec.java2jdbc.ConverterEnumSpecTest" title="Enum" />
+* Records with a single component of a JDBC-supported type automatically gain a converter, 
+  if no converter is defined for the record.
+* Enums will get automatic a converter with convert it to the name,
+  if no converter is defined for the record.
+
+## ✅ Custom converter
+The developer can define converter to set JDBC values from Java
+* ✅ <SpecTest test="io.kaumei.jdbc.spec.java2jdbc.ConverterSimpleSpecTest" title="Simple" />
+  A static simple converter which converts a value `T` into a supported JDBC value `R`: 
+  `static R toDB(T value)`
+  * Parameter and return must be `unspecific` or `non-null`.
+  * The method must be annotated with `@JavaToJdbc`
+* ✅ <SpecTest test="io.kaumei.jdbc.spec.java2jdbc.ConverterStatementSpecTest" title="Statement"/>
+  A static JDBC converter which sets a value `R` on a given `PreparedStatement`:
+  `static void toDB(PreparedStatement stmt, int index, T value)`
+  The parameter `value` must be `nullable` or `unspecific`.
+  The method must handel `null` correctly. 
+  The method must be annotated with `@JavaToJdbc`
+* ✅ <SpecTest test="io.kaumei.jdbc.spec.java2jdbc.ConverterObjectSpecTest" title="Object" />
+  A object method which is annotated with `@JavaToJdbc` and returns the object value as JDBC value.
+  The return value must be be `unspecific` or `non-null`.
+
+## ✅ Collections
+<SpecTest test="io.kaumei.jdbc.spec.java2jdbc.CollectionsSpecTest" title="Collections" />
+
+SQL markers for method parameters that are arrays or single-parameter collections
+will be replaced with a list of SQL `?` placeholders separated by commas.
+This makes it easy to use SQL `IN (...)` clause.
+The number of `?` placeholders matches the size of the array or collection.
+Please check your JDBC driver and database documentation for any limits on the maximum size of an `IN (...)` clause.
+
+* Nullable collections/arrays are not allowed
+* Nullable markers for the values if the collections are allowed
+* Nullable markers for the primitives in arrays are ignored

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SPDX-FileCopyrightText: 2025 kaumei.io
+  SPDX-License-Identifier: Apache-2.0
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.kaumei.jdbc</groupId>
+        <artifactId>jdbc-parent</artifactId>
+        <version>develop-SNAPSHOT</version>
+    </parent>
+    <name>${project.groupId}:${project.artifactId}</name>
+    <groupId>io.kaumei.jdbc</groupId>
+    <artifactId>jdbc-processor-spec</artifactId>
+    <!-- @part:dependency -->
+    <properties>
+        <kaumei-jdbc.version>develop-SNAPSHOT</kaumei-jdbc.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>io.kaumei.jdbc</groupId>
+            <artifactId>jdbc-annotation</artifactId>
+            <version>${kaumei-jdbc.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.kaumei.jdbc</groupId>
+            <artifactId>jdbc-core</artifactId>
+            <version>${kaumei-jdbc.version}</version>
+        </dependency>
+        <!-- @part:dependency -->
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+            <version>${version.jspecify}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${version.h2database}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${version.postgresql}</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.inject</groupId>
+            <artifactId>jakarta.inject-api</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${version.junit}</version>
+            <scope>compile</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${version.junit}</version>
+            <scope>compile</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-commons</artifactId>
+            <version>${version.junit}</version>
+            <scope>compile</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${version.junit}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite-engine</artifactId>
+            <version>${version.junit}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${version.assertj}</version>
+            <scope>compile</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${version.mockito}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${version.mockito}</version>
+        </dependency>
+        <!-- @part:dependency -->
+    </dependencies>
+    <!-- @part:dependency -->
+    <build>
+        <plugins>
+            <!-- @part:compiler -->
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>io.kaumei.jdbc</groupId>
+                            <artifactId>jdbc-processor</artifactId>
+                            <version>${kaumei-jdbc.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <compilerArgs>
+                        <!-- @part:compiler -->
+                        <arg>${jacoco.compiler}</arg>
+                        <arg>-Aio.kaumei.jdbc.processor.debugfolder=${project.basedir}/my_debug</arg>
+                        <!-- @part:compiler -->
+                        <arg>-Aio.kaumei.jdbc.processor.config=io.kaumei.jdbc.spec.ConfigSpec</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <!-- @part:compiler -->
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,106 @@
+---
+title: ✅ JDBC select
+---
+import SpecTest from '../../../components/SpecTest.astro';
+import Link from '../../../components/Link.astro';
+
+* `@JdbcSelect` define a method which will execute SQL selects like
+   * create `prepareStatement`
+   * fill parameter from the method
+   * configure statement
+   * execute and process the `ResultSet`
+* the `value` of `@JdbcSelect` must contain a valid SQL select statement with 
+  named parameters (`:name`) as described in 
+  <Link ref="/spec/param-binding">param binding</Link>
+* Return types must be non-void and must be either 
+  * primitive
+  * a column Java type
+  * a row Java type
+  * one of, where T may be a primitve, a column Java type or a row Java type
+    * `List<T>`
+    * `Stream<T>`
+    * `JdbcIterable<T>`
+    * `JdbcResultSet`
+* Result types are mapped as described in <Link ref="/spec/result-mapping">result mapping</Link>.
+* Parameter types are mapped as described in <Link ref="/spec/param-binding">param binding</Link>.
+* Converters are searched as described in <Link ref="/spec/converter-lookup">converter lookup</Link>.
+* null handling as described in <Link ref="/spec/null-check-support">null check support</Link>.
+
+<SpecTest title="SelectSpec" test="io.kaumei.jdbc.spec.select.SelectSpecTest" /> 
+
+
+## ✅ Return a column/row Java type
+<SpecTest title="SelectValueSpec" test="io.kaumei.jdbc.spec.select.SelectValueSpecTest" /> 
+* Return types are primitives, column or row Java type
+  * For a column Java type the annotation processor map always the first column
+* Supported annotations:
+  * if column Java type: `@JdbcName`: define the name of the column to use the value from
+  * `@JdbcConverterName`: define a specific converter
+  * `@JdbcNoRows`: define the behavior in case no rows are returned 
+    * `JdbcNoRows.THROW_EXCEPTION`: a `JdbcEmptyResultSetException` is thrown
+    * `JdbcNoRows.RETURN_NULL`:
+      * return `null` if the return type is `nullable` or `unspecific`
+      * return `Optional.EMPTY` if the return type is Optional
+      * throws `JdbcEmptyResultSetException` if return type is `non-null`
+  * `@JdbcNoMoreRows`: define the behavior in case more than a row is returned 
+    * `JdbcNoMoreRows.THROW_EXCEPTION`: 
+      * a `JdbcUnexpectedRowException` is thrown
+      * ✅ the max rows return by the statement is set to two, e.g. `stmt.setFetchSize(2)`
+    * `JdbcNoMoreRows.IGNORE`: 
+      * the other rows are ignored
+      * ✅ the max rows return by the statement is set to one, e.g. `stmt.setFetchSize(1)`
+* The default behavior is `JdbcNoRows.THROW_EXCEPTION` and `JdbcNoMoreRows.THROW_EXCEPTION`
+* ✅ Java Optional is supported
+
+## ✅ Return List
+<SpecTest title="SelectListSpec" test="io.kaumei.jdbc.spec.select.SelectListSpecTest" /> 
+* ✅ List of primitives, column or row Java type
+  * For a column Java type the annotation processor map always the first column
+* ✅ The column type is mapped to the first column of the result set
+  * ✅ column Java types can be mapped to a different column with `@JdbcName`
+* Supported annotations:
+  * ✅ if column Java type: `@JdbcName`: define the name of the column to use the value from
+  * ✅ `@JdbcNoRows`: is not supported
+  * ✅ `@JdbcNoMoreRows`: is not supported
+* ✅ Java Optional is supported for column Java types
+
+
+## ✅ Return Stream
+<SpecTest title="SelectStreamSpec" test="io.kaumei.jdbc.spec.select.SelectStreamSpecTest" /> 
+* ✅ List of primitives, column or row Java type
+  * For a column Java type the annotation processor map always the first column
+* ✅ The column type is mapped to the first column of the result set
+  * ✅ column Java types can be mapped to a different column with `@JdbcName`
+* Supported annotations:
+  * ✅ if column Java type: `@JdbcName`: define the name of the column to use the value from
+  * ✅ `@JdbcNoRows`: is not supported
+  * ✅ `@JdbcNoMoreRows`: is not supported
+* ✅ Java Optional is supported for column Java types
+
+## ✅ Return JdbcIterable
+
+The JdbcIterable is defacto a `Iterable<T>` with `AutoCloseable` support.
+This result can be resued in for loops or can be used to create custom streams.
+
+<SpecTest title="SelectIterableSpec" test="io.kaumei.jdbc.spec.select.SelectIterableSpecTest" /> 
+* ✅ JdbcIterator of primitives, column or row Java type
+  * For a column Java type the annotation processor map always the first column
+* ✅ The column type is mapped to the first column of the result set
+  * ✅ column Java types can be mapped to a different column with `@JdbcName`
+* Supported annotations:
+  * ✅ if column Java type: `@JdbcName`: define the name of the column to use the value from
+  * ✅ `@JdbcNoRows`: is not supported
+  * ✅ `@JdbcNoMoreRows`: is not supported
+* ✅ Java Optional is supported for column Java types
+
+## ✅ Return JdbcResultSet
+<SpecTest title="SelectResultSet" test="io.kaumei.jdbc.spec.select.SelectResultSetSpecTest" />
+* ✅ JdbcResultSet of primitives, column or row Java type
+  * For a column Java type the annotation processor map always the first column
+* ✅ The column type is mapped to the first column of the result set
+  * ✅ column Java types can be mapped to a different column with `@JdbcName`
+* Supported annotations:
+  * ✅ if column Java type: `@JdbcName`: define the name of the column to use the value from
+  * ✅ `@JdbcNoRows`: is not supported
+  * ✅ `@JdbcNoMoreRows`: is not supported
+* ✅ Java Optional is supported for column Java types

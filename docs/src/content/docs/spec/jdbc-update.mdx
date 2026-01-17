@@ -1,0 +1,37 @@
+---
+title: ✅ JDBC update
+---
+import SpecTest from '../../../components/SpecTest.astro';
+import Link from '../../../components/Link.astro';
+
+<SpecTest title="UpdateSpec" test="io.kaumei.jdbc.spec.update.UpdateSpecTest" /> 
+
+* `@JdbcUpdate` define a method which will execute SQL updates
+   * create `prepareStatement`
+   * fill parameter from the method
+   * configure statement
+   * execute and process the `Statement.executeUpdate`
+   * process possible generated values and return them
+* ✅ the `value` of `@JdbcUpdate` must contain a valid SQL select statement with
+  named parameters (`:name`) as described in 
+  <Link ref="/spec/param-binding">param binding</Link>
+* ✅ Return types may be `void`, `int`, or `boolean`; 
+  * ✅ `int` will return the result of `executeUpdate`
+  * ✅ `boolean` returns `true` when at least one row is affected.
+* ✅ Returning generated values requires `@JdbcReturnGeneratedValues`.
+  The method must return a `non-null`, non-collection type that can be mapped via `@JdbcToJava`.
+  * ✅ `GENERATED_KEYS`: The processor calls `getGeneratedKeys()` (default)
+  * ✅ `EXECUTE_QUERY`: The processor calls `executeQuery()`
+  * return type must be `non-null` or `unspecific`
+
+
+## ✅ JDBC batch update 
+<SpecTest title="UpdateBatchSpec" test="io.kaumei.jdbc.spec.update.UpdateBatchSpecTest" /> 
+* `@JdbcUpdateBatch` define a method which will execute SQL updates in batch 'mode'
+* For batch operations, declare the return type as an inner interface extending `JdbcBatch`.
+* the Result must be `non-null` or `unspecific`
+* supported annotations
+  * ✅ `@JdbcBatchSize` on the method or on an parameter for dynamic
+* ✅ Define the `@JdbcUpdate` method in the interface
+  The processor emits a nested implementation that collects parameters, honours `@JdbcBatchSize`
+  (constant or parameter), and delegates to `PreparedStatement#addBatch()`.

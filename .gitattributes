@@ -1,0 +1,13 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# Denote all files that are truly binary and should not be modified.
+*.png   binary
+*.jpg   binary
+*.zip   binary
+*.pdf   binary
+
+# Declare files that will always have defined line endings on checkout.
+*.sln   text eol=crlf
+*.sh    text eol=lf
+*.bat   text eol=crlf

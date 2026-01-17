@@ -1,0 +1,40 @@
+---
+title: Installation
+description: Installation guide for Kaumei JDBC
+---
+import { Code, Aside } from '@astrojs/starlight/components';
+import { extractCodePart } from '../utils.ts';
+import pomCode  from '/root/jdbc-processor-spec/pom.xml?raw';
+
+## Prerequisites
+**Kaumei&nbsp;JDBC** currently requires JDK 25.
+Make sure your build and IDE use that runtime, as other Java versions are unsupported at the moment.
+
+## Maven
+Add **Kaumei&nbsp;JDBC** dependencies to your `pom.xml`, either directly or inside dependency management.
+* The `io.kaumei.jdbc:jdbc-annotation` contains only code that is needed during compile time,
+  therefore its scope is `provided`. There is no need to include this in another scope.
+* The `io.kaumei.jdbc:jdbc-core` contains boilerplate that is used by the generated code,
+  therefore we keep it in the default `compile` scope.
+
+<Code code={extractCodePart(pomCode, "dependency")} lang="xml" title="pom.xml"/>
+
+Enable annotation processing by configuring the compiler plugin.
+Currently, there are no known issues with the order in which the plugin is defined so far.
+If you encounter any issues, please let us know.
+
+<Code code={extractCodePart(pomCode, "compiler")} lang="xml" title="pom.xml"/>
+
+<Aside>
+Use the same version for `jdbc-annotation`, `jdbc-core`, and `jdbc-processor`. 
+Mixing versions is not supported.
+</Aside>
+
+## IntelliJ
+When you import the Maven project in IntelliJ IDEA, ensure annotation processing is enabled.
+Open `Build, Execution, Deployment > Compiler > Annotation Processors`.
+Tick *Enable annotation processing*.
+
+<Aside>
+Tighter integration with the IntelliJ incremental compiler is being explored.
+</Aside>

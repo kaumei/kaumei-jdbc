@@ -1,0 +1,318 @@
+---
+title: SQL select
+description: A guide to use SQL select for a column/row/collection
+---
+import { Aside } from '@astrojs/starlight/components';
+import { Code } from '@astrojs/starlight/components';
+import { extractCodePart } from '../utils.ts';
+import SqlCode    from '/root/jdbc-processor-spec/src/main/resources/postgresql_create_db.sql?raw';
+import H2SqlCode  from '/root/jdbc-processor-spec/src/main/resources/h2_create_db.sql?raw';
+import JdbcToJava from '/root/jdbc-annotation/src/main/java/io/kaumei/jdbc/annotation/JdbcToJava.java?raw';
+
+//import JdbcNoRowsApi          from '/root/README.md'; //'/root/jdbc-processor-spec/src/main/java/io/kaumei/jdbc/examples/docs/select/JdbcNoRowsApi.java?raw';
+//import JdbcConverterNameApi   from '/root/README.md'; //'/root/jdbc-processor-spec/src/main/java/io/kaumei/jdbc/examples/docs/select/JdbcConverterNameApi.java?raw';
+//import SelectCollection       from '/root/README.md'; //'/root/jdbc-processor-spec/src/main/java/io/kaumei/jdbc/examples/docs/select/SelectCollection.java?raw';
+//import SelectCollectionTest   from '/root/README.md'; //'/root/jdbc-processor-spec/src/test/java/io/kaumei/jdbc/examples/docs/select/SelectCollectionTest.java?raw';
+//import SelectColumn           from '/root/README.md'; //'/root/jdbc-processor-spec/src/main/java/io/kaumei/jdbc/examples/docs/select/SelectColumn.java?raw';
+//import SelectNameMapping      from '/root/README.md'; //'/root/jdbc-processor-spec/src/main/java/io/kaumei/jdbc/examples/docs/select/SelectNameMapping.java?raw';
+//import SelectNull             from '/root/README.md'; //'/root/jdbc-processor-spec/src/main/java/io/kaumei/jdbc/examples/docs/select/SelectNull.java?raw';
+//import SelectRow              from '/root/README.md'; //'/root/jdbc-processor-spec/src/main/java/io/kaumei/jdbc/examples/docs/select/SelectRow.java?raw';
+
+SelectRowTest
+For the following examples we will reuse the table from the simple example.
+
+You can return simple column values in different ways:
+* default SQL types
+* objects/records created with factory methods out-of-the box
+* define global JDBC-to-Java converter for a Java type
+* define specific JDBC-to-Java converter 
+* Java enums 
+
+## Return Columns
+
+### Return SQL supported values
+
+You can return just one column.
+In this case we will always select the first column.
+
+{/*<Code code={extractCodePart(SelectColumn, "selectColumn")} lang="java"/>*/}
+
+Supported types from `java.sql.ResultSet` are
+* `boolean`
+* `byte[]`, 
+* `byte`, `short`, `int`, `long`, 
+* `float`, `double`
+* `java.math.BigDecimal`
+* `java.lang.Object` (will call getObject from the ResultSet)
+* `java.lang.String`
+* `java.net.URL`
+* `java.sql.Blob`, `java.sql.Clob`, `java.sql.NClob`
+* `java.sql.Date`, `java.sql.Time`, `java.sql.Timestamp`
+* `java.sql.Ref`, `java.sql.RowId`, 
+* `java.sql.SQLXML`
+
+In additional the following are supported by a default converter.
+It calls the primitive `ResultSet` methods, with support to return `null` in case.
+* `java.lang.Boolean`, 
+* `java.lang.Byte`, `java.lang.Short`, `java.lang.Integer`, `java.lang.Long`
+* `java.lang.Float`, `java.lang.Double`
+
+The following type will call the `getString` from `ResultSet`
+* `char`, `java.lang.Character`
+
+
+
+### Factory methods for classes and records
+By default we support out of the box standard type converter from
+JDBC values to Java values. In common cases this will not fit our need,
+so we support a simple way to convert JDBC type into Java objects.
+
+#### Create a record by a static `valueOf` method
+The record contains exactly one `public` `static` `valueOf` method, which
+  * returns the record type
+  * has exactly one parameter
+  * the parameter typ can be converted from JDBC to Java
+
+{/*<Code code={extractCodePart(SelectColumn, "selectStreetWithValueOf")} lang="java"/>*/}
+
+#### Create a record by a `constructor`
+The record contains exactly one component
+  * the component typ can be converted from JDBC to Java
+
+{/*<Code code={extractCodePart(SelectColumn, "selectStreetWithConstructor")} lang="java"/>*/}
+
+####  Create an object by a static `valueOf` method
+The class contains exactly one `public` `static` `valueOf` method, which
+* returns the class type
+* has exactly one parameter
+* the parameter typ can be converted from JDBC to Java
+
+{/*<Code code={extractCodePart(SelectColumn, "selectCityWithValueOf")} lang="java"/>*/}
+
+#### Create an object by a `constructor`
+The class contains exactly one constructor which  
+* has exactly one parameter
+* the parameter typ can be converted from JDBC to Java
+
+{/*<Code code={extractCodePart(SelectColumn, "selectCityWithConstructor")} lang="java"/>*/}
+
+### Convert JDBC column to any custom Java types
+You can specify for any of your custom types a converter, 
+which implements the following `JdbcToJava.Column` functional interface. 
+
+{/*<Code code={extractCodePart(JdbcToJava, "Column")} lang="java"/>*/}
+
+Just annotate a `public` `static` method with `@JdbcToJava` in your code and the 
+annotation processor will register its return type. 
+Every time you use this type the converter will be used to convert from JDBC to Java. 
+
+<Aside>
+Keep in mind, all `@JdbcToJava` must be aware of null values coming back from the JDBC driver.
+</Aside>
+
+Some examples:
+
+
+{/*<Code code={extractCodePart(SelectColumn, "selectPostgresqlInterval")} lang="java"/>*/}
+{/*<Code code={extractCodePart(SelectColumn, "selectUUID")} lang="java"/>*/}
+
+
+### Convert JDBC to Java enums
+By default we use the static `valueOf` method of the enum. 
+This will convert the names from the database to the case sensitive names of the Java enum. 
+This will only work if both are the same.
+
+{/*<Code code={extractCodePart(SelectColumn, "selectEnum")} lang="java"/>*/}
+
+For other kind of mappings we can follow different strategies:
+* by a custom string
+* by a int value
+
+In all those case you most likely have already a static converter from those values into the Java enum.
+You can annotate those methods with `@JdbcToJava`
+
+
+{/*<Code code={extractCodePart(SelectColumn, "selectMoodCustom")} lang="sql"/>*/}
+{/*<Code code={extractCodePart(SelectColumn, "selectMoodInt")} lang="java"/>*/}
+
+## Return rows/objects
+
+### Create objects with constructor
+By default we map names one to one.
+If you provide a record/class with a visible constructor the annotation processor will generate
+a factory method and use it to convert the JDBC row to a Java object.
+There must be exact one visible constructor.
+
+{/*<Code code={extractCodePart(SelectRow, "selectAddressRecordConstructor")} lang="java"/>*/}
+{/*<Code code={extractCodePart(SelectRow, "selectAddressClassConstructor")} lang="java"/>*/}
+
+
+### Create objects with `valueOf`
+If you prefer to create Java Objects with a `valueOf` this is also provided.
+There must be exact one visible static `valueOf` method.
+
+{/*<Code code={extractCodePart(SelectRow, "selectAddressRecordValueOf")} lang="java"/>*/}
+{/*<Code code={extractCodePart(SelectRow, "selectAddressClassValueOf")} lang="java"/>*/}
+
+<Aside>
+A `valueOf` will overrule the constructor.
+</Aside>
+
+### Define a converter for row
+Like with columns we can also define a converter to convert SQL rows into Java Objects.
+You can specify for any of your custom types a converter, 
+which implements the `JdbcToJava.Row` functional interface. 
+
+{/*<Code code={extractCodePart(JdbcToJava, "Row")} lang="java"/>*/}
+{/*<Code code={extractCodePart(SelectRow, "selectAddressRecordSpecial")} lang="java"/>*/}
+
+
+## Return collections
+By now we have only return one value. This section will provide different return types to return collections.
+
+### List
+Use a list if you want to return all values with one call. 
+* Return type: `List<T>`
+* `T` must be a valid java class, which can be converted from the a row/column.
+
+{/*<Code code={extractCodePart(SelectCollection, "selectList")} lang="java"/>*/}
+
+This works also with full rows:
+
+{/*<Code code={extractCodePart(SelectCollection, "selectListRow")} lang="java"/>*/}
+
+
+### Iterable
+If your selected rows are very big, we provide a kind of Java `Iterator<T>`. Our iterator has a close method and extends `AutoCloseable`.
+It must always be used with `try()` so close will be called.
+* Return type: `JdbcIterable<T>`
+
+{/*<Code code={extractCodePart(SelectCollection, "selectIterable")} lang="java"/>*/}
+{/*<Code code={extractCodePart(SelectCollectionTest, "selectIterable")} lang="java"/>*/}
+
+<Aside>
+Keep in mind: you have to close all iterators.
+</Aside>
+
+### Stream
+* Return type: `Stream<T>`
+* `T` must be a valid java class, which can be converted from a JDBC row.
+
+{/*<Code code={extractCodePart(SelectCollection, "selectStream")} lang="java"/>*/}
+{/*<Code code={extractCodePart(SelectCollectionTest, "selectStream")} lang="java"/>*/}
+
+<Aside>
+Keep in mind: you have to close all streams.
+</Aside>
+
+
+### A special ResultSet
+A kind of ResultSet which supports not all methods of the underlaying ResultSet. 
+In short we remove all get methods and add `getRow()`, `getRowOpt()`
+We support:
+* `close()`
+* `getRow()`, `getRowOpt()`
+* `next()`, `isAfterLast()`, `isBeforeFirst()`, `isFirst()`, `isLast()`, `deleteRow()`, `previous()`
+* Return type: `JdbcResultSet<T>`
+* `T` must be a valid java class, which can be converted from a JDBC row.
+
+{/*<Code code={extractCodePart(SelectCollection, "selectResultSet")} lang="java"/>*/}
+
+<Aside>
+Keep in mind: you have to close all result sets.
+</Aside>
+
+
+## Useful annotations with `@JDBCSelect`
+
+The following annotation can only be used in conjunction with `@JdbcSelect`:
+
+| Annotation                  | Default        | Config | Type | Method | Parameter |
+| --------------------------- | :------------: | :----: | :--: | :----: | :-------: |
+| `@JdbcFetchDirection`       | ❌             | ✅     | ✅    | ✅     | ✅       |
+| `@JdbcFetchSize`            | ❌             | ✅     | ✅    | ✅     | ✅       |
+| `@JdbcNoRows`               | RETURN_NULL    | ✅     | ✅    | ✅     | ❌       |
+| `@JdbcConverterName`        | ❌             | ❌     | ❌    | ✅     | ❌       |
+| `@JdbcResultSetConcurrency` | ❌             | ✅     | ✅    | ✅     | ✅       |
+| `@JdbcResultSetType`        | ❌             | ✅     | ✅    | ✅     | ✅       |
+| `@JdbcName`                 | ❌             | ❌     | ❌    | ❌     | ❌       |
+
+### `org.jspecify`
+For none primitives we support to mark the return value
+optional with the annotations from the `org.jspecify` project.
+In this case we return `null`, if 
+* the column value is `null` or
+* no rows are selected.
+
+{/*<Code code={extractCodePart(SelectNull, "selectColumn")} lang="java"/>*/}
+{/*<Code code={extractCodePart(SelectNull, "selectColumnOptional")} lang="java"/>*/}
+{/*<Code code={extractCodePart(SelectNull, "selectRow")} lang="java"/>*/}
+{/*<Code code={extractCodePart(SelectNull, "selectRowOptional")} lang="java"/>*/}
+
+<Aside>
+Keep in mind to put the annotations at the correct place.
+They must be on/at the return type not the method.
+</Aside>
+
+
+### `@JdbcNoRows`: Define behaviour on no rows
+If you want to throw an exception in case no rows are selected, 
+annotate the method with `@JdbcNoRows(THROW_EXCEPTION)`.
+Applicable for methods annotated with `@JdbcSelect` and `@Nullable`.
+Currently we ignore it on all other methods.
+
+{/*<Code code={extractCodePart(JdbcNoRowsApi, "selectColumnOptional")} lang="java"/>*/}
+{/*<Code code={extractCodePart(JdbcNoRowsApi, "selectColumnOptionalThrows")} lang="java"/>*/}
+{/*<Code code={extractCodePart(JdbcNoRowsApi, "selectRowOptional")} lang="java"/>*/}
+{/*<Code code={extractCodePart(JdbcNoRowsApi, "selectRowOptionalThrows")} lang="java"/>*/}
+
+
+### `@JdbcConverterName`: select a specific named converter
+With this annotation you can define a specific JDBC to Java converter.
+In some cases we want not the common converter for a specific type.
+For example a boolean can be designed in very different ways in the database.
+
+Applicable for methods annotated with 
+* `@JdbcSelect`
+* `@JdbcReturnGeneratedValues`
+
+Select different converter for a type
+In some cases we want not the common converter for a specific type.
+For example a boolean can be designed in very different ways in the database.
+If you use the SQL typ BOOLEAN, you can simple use:
+* Example SQL CHAR to Java Boolean
+* The database column has type VARCHAR. We convert "1", "y", "yes" and "true" to true, for all other values we return false. The name of the convert should be BOOLEAN_ALL.
+
+{/*<Code code={extractCodePart(JdbcConverterNameApi, "JdbcConverterNameApi")} lang="java"/>*/}
+
+
+### `@JdbcFetchDirection` (TBD)
+Applicable for methods annotated with 
+* `@JdbcSelect` and returning collections
+
+
+### `@JdbcFetchSize` (TBD)
+Applicable for methods annotated with 
+* `@JdbcSelect` and returning collections
+
+
+### `@JdbcResultSetConcurrency` and `@JdbcResultSetType` (TBD)
+Applicable for methods annotated with 
+* `@JdbcSelect` and returning collections
+* both must show up always together
+
+## `@JdbcName` Mapping of Java names to JDBC names
+
+The tool does the following mapping from Java names to JDBC names:
+* no case changes in the Java name: the name is used as it is
+* at every case change from lower to upper case we insert a '_', e.g. `fooBar` => `foo_bar`, `fooBAr` => `foo_bar`
+* with `@JdbcName` you can overwrite the mapping and define your one name
+
+You can use this at the following places
+* `@JdbcSelect`s return values
+* factory methods/constructors for objects (at the parameter `@JdbcName` will define the name of the column to used)
+
+
+{/*<Code code={extractCodePart(H2SqlCode, "db_name_mapping")} lang="java"/>*/}
+{/*<Code code={extractCodePart(SelectNameMapping, "selectColumnOneTwoThree")} lang="java"/>*/}
+{/*<Code code={extractCodePart(SelectNameMapping, "selectRowCustomRecord")} lang="java"/>*/}

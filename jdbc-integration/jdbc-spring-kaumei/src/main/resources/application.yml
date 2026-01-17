@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2025 kaumei.io
+# SPDX-License-Identifier: Apache-2.0
+spring:
+  datasource:
+    url: jdbc:h2:mem:kaumei-demo;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql

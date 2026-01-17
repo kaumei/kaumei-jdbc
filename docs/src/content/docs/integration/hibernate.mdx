@@ -1,0 +1,39 @@
+---
+title: Hibernate
+description: Hibernate integration with Kaumei JDBC
+---
+import { Code } from '@astrojs/starlight/components';
+import { extractCodePart } from '../utils.ts';
+import provider from '/root/jdbc-integration/jdbc-spring/src/main/java/io/kaumei/jdbc/examples/spring/hibernate/HibernateConnectionProvider.java?raw';
+import config from '/root/jdbc-integration/jdbc-spring/src/main/java/io/kaumei/jdbc/examples/spring/hibernate/SpringHibernateConfig.java?raw';
+
+## Spring + Hibernate
+
+Use this integration when Spring manages transactions through `HibernateTransactionManager`.
+`DataSourceUtils.getConnection` yields the connection bound to the current Hibernate session.
+Flush the session before running native SQL to ensure all pending changes hit the database.
+
+Wrap the flush + connection retrieval inside a `JdbcConnectionProvider` bean:
+
+<Code
+  code={extractCodePart(provider, "hibernate")}
+  lang="java"
+  title='HibernateConnectionProvider.java'
+/>
+
+Inject the provider into your generated classes through the Spring configuration:
+
+<Code
+  code={extractCodePart(config, "hibernate")}
+  lang="java"
+  title='SpringHibernateConfig.java'
+/>
+
+### References
+
+* [Spring: Hibernate integration](https://docs.spring.io/spring-framework/reference/data-access/orm/hibernate.html)
+
+## Other frameworks
+
+This approach has not been tested outside Spring.
+Frameworks that expose a managed Hibernate session should provide a similar provider.

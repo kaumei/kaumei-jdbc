@@ -1,0 +1,78 @@
+---
+title: ❓ Processor configuration
+---
+import SpecTest from '../../../components/SpecTest.astro';
+
+## General configuration
+
+The annotation processor can be configured by annotation processor options or
+by one class, which has the annotation `@JdbcConfig``.
+
+## Annotation processor options
+
+| options keys                           | Description                       | Default |
+| -------------------------------------- | --------------------------------- | ------- |
+| `io.kaumei.jdbc.processor.config`      | define the config class           | unset   |
+| `io.kaumei.jdbc.processor.debugfolder` | enable/disable auto configuration | unset   |
+| `io.kaumei.jdbc.processor.loglevel`    | the log level                     | `ERROR` |
+
+* ❓ If `io.kaumei.jdbc.processor.config` is set, it must point to the one class 
+  which is annotated with `@JdbcConfig`.
+  This must be the full qualified class name.
+  In any other case the annotation processor throws an exception.
+  It must be set, if your IDE does incremental compiling.
+  See below for more information, what can be configured.
+* ❓ If `io.kaumei.jdbc.processor.debugfolder` is set the annotation processor dumps its internal state to that folder.
+  This is only useful for debug sessions.
+* ❓ `io.kaumei.jdbc.processor.loglevel` will change the log level. 
+  Supported values are:  `ERROR`, `WARN`, `INFO`, `DEBUG`.
+
+### Examples
+In Maven the options can be set like the following example
+```xml
+<compilerArgs>
+    <arg>-Aio.kaumei.jdbc.processor.config=...</arg>
+    <arg>-Aio.kaumei.jdbc.processor.debugfolder=...</arg>
+    <arg>-Aio.kaumei.jdbc.processor.loglevel=...</arg>
+</compilerArgs>
+```
+
+## Configuration class 
+
+The annotation processor can be configured by annotate a type with `@JdbcConfig`
+or by an annotation processor option (see above).
+You can defined the default values for the annotation processor run.
+
+### Supported annotations
+
+| Annotation                    | Default           |
+| ----------------------------- | ----------------- |
+| `@JdbcBatchSize`              | `1000`            |
+| `@JdbcFetchDirection`         | unset             |
+| `@JdbcFetchSize`              | unset             |
+| `@JdbcMaxRows`                | unset             |
+| `@JdbcNoMoreRows`             | `THROW_EXCEPTION` |
+| `@JdbcNoRows`                 | `THROW_EXCEPTION` |
+| `@JdbcQueryTimeout`           | unset             |
+| `@JdbcResultSetConcurrency`   | unset             |
+| `@JdbcResultSetType`          | unset             |
+| `@JdbcReturnGeneratedValues`  | `GENERATED_KEYS`  |
+
+### Define a parent config
+
+With `@JdbcConfig(parent = ...)` one parent configuration can be defined.
+The annotation processor will go the the first parent and will import all
+annotations and converter top down to the current.
+Later will overwrite the former.
+
+### Define additional converter
+* All static methods with in the configuration type will be treat as converter,
+  if they are annotated with either `@JdbcToJava` or `JavaToJdbc`.
+* The annotation `@JdbcConfig(converter = {...})` defines global converter.
+* if converter types are referenced, it may have one `@JdbcToJava` or `JavaToJdbc`,
+  in this cases the processor will try to register static converter.
+
+<SpecTest title="@JdbcQueryTimeout"          test="io.kaumei.jdbc.spec.config.StatementInvalidSpecTest" /> 
+<SpecTest title="@JdbcQueryTimeout"          test="io.kaumei.jdbc.spec.config.StatementSpecTest" /> 
+<SpecTest title="@JdbcQueryTimeout"          test="io.kaumei.jdbc.spec2.config.StatementInterfaceSpecTest" /> 
+<SpecTest title="@JdbcQueryTimeout"          test="io.kaumei.jdbc.spec2.config.StatementInvalidSpecTest" /> 

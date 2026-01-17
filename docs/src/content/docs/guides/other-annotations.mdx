@@ -1,0 +1,36 @@
+---
+title: Other annotations
+description: A guide to enhance your methods
+---
+import { Aside } from '@astrojs/starlight/components';
+import { Code } from '@astrojs/starlight/components';
+import { extractCodePart } from '../utils.ts';
+import Link from '../../../components/Link.astro';
+
+
+
+With following annotations you can change the default behavior of the annotation process for methods:
+
+| Annotation                   | Default        | Config | Type    | Method | Parameter |
+| ---------------------------- | -------------- | ------ | ------- | ------ | --------- |
+| `@JdbcBatchSize`             | 1000           | yes    | yes     | yes    | yes       |
+| `@JdbcReturnGeneratedValues` | GENERATED_KEYS | yes    | yes     | yes    | no        |
+
+They can show up on different places and will be resolved in the following order
+
+* **param**: the flagged parameter will be used as input value in the generated code. 
+* **method**: it will change the behavior of this method and must be valid for the method
+* **type**:   you can change the behavior for all applicable methods in the type or below types
+* **config**: you can change the behavior for all applicable methods in the type or below types
+
+### `@JdbcBatchSize`
+Applicable for methods annotated with 
+* `@JdbcUpdate` with return a batch update
+For examples see <Link ref="/guides/update">SQL update</Link>
+
+### `@JdbcReturnGeneratedValues`
+Applicable for methods annotated with 
+* `@JdbcUpdate`
+
+For examples see <Link ref="/guides/update">SQL update</Link>
+

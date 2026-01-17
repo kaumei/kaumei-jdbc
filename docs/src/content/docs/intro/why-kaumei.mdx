@@ -1,0 +1,107 @@
+---
+title: Why Kaumei JDBC
+description: Compare Kaumei JDBC with other database access options and decide when to use it.
+---
+
+## Motivation
+
+In the Java world there are many ways to work with databases (as of late 2025):
+* [Hibernate](https://hibernate.org/orm/documentation),
+  [EclipseLink](https://eclipse.dev/eclipselink/),
+  and [JPA](https://jakartaee.github.io/persistence/)
+  * Complex: Based on a formal specification with many hidden details.
+  * Surface-level knowledge: Most developers know only the simple setups.
+  * Easy to misconfigure: Often applied and tuned incorrectly.
+  * Lengthy learning curve.
+  * Heavy reliance on caching to hide repeated entity loading when generated SQL
+    is not tuned.
+  * SQL is generated dynamically, so you usually need to capture it from logs for
+    manual testing.
+* [JDBC][jdbc-doc] (Java Database Connectivity)
+  * Low-level: Direct API for database access, no abstraction.
+  * Universal: Standard across all relational databases.
+  * Verbose: Lots of boilerplate, error-prone if not wrapped.
+  * Manual resource handling with repetitive `try ... catch` blocks.
+* [jdbi](https://jdbi.org)
+  * Provides similar annotations but relies on reflection instead of code
+    generation.
+  * Lightweight: Thin layer over JDBC, minimal abstraction.
+  * Flexible: SQL remains explicit, extensions for mapping are available.
+  * Manual effort: Requires discipline and boilerplate compared to heavier ORMs.
+* [jOOQ](https://www.jooq.org)
+  * SQL-centric: Strongly embraces SQL instead of abstracting it away.
+  * Expressive: Fluent API gives direct access to advanced SQL features.
+  * Learning curve: Powerful but can overwhelm if SQL skills are weak.
+  * SQL is constructed programmatically.
+    You typically render it from the DSL when you need a raw statement.
+* [MyBatis](https://mybatis.org)
+  * SQL converter: You write SQL and the framework maps results to objects.
+  * Middle ground: More control than ORM, less boilerplate than raw JDBC.
+  * XML/annotations: Mapping configuration can become verbose.
+* [Spring JDBC](https://spring.io/projects/spring-data-jdbc)
+  * Thin abstraction that reduces boilerplate and integrates tightly with Spring.
+  * Simplified JDBC: Removes boilerplate, focuses on templates.
+  * Spring integration: Fits seamlessly into the Spring ecosystem.
+  * Limited abstraction: Still SQL-centric, not an ORM.
+* and others.
+
+Most of them share common downsides:
+* **Steep learning curve**: Understanding the full feature set takes significant
+  effort.
+* **Heavy use of reflection**: Hidden control flows make debugging difficult when
+  things go wrong.
+* **Opaque execution**: Database access can happen in places you do not expect.
+  That complicates reasoning about the system.
+* **Mandatory session layers**: Most frameworks need session management above JDBC
+  connections.
+  That adds lifecycle overhead.
+* **On-demand SQL generation**: Queries are assembled dynamically.
+  They can be hard to trace in the codebase.
+* **Slower start-up**: Runtime overhead slows tests and application start-up.
+
+## How Kaumei JDBC compares
+Kaumei JDBC keeps SQL explicit while reducing the mechanical work around mapping and execution.
+* Minimal dependency set: you only need the JDBC driver and JSpecify.
+  The Kaumei JDBC core library adds a small core jar, typically under a few hundred KB.
+* Code is generated during annotation processing.
+* No reflection during start-up in generated code.
+* No runtime registration or bootstrapping required.
+* Generated code can be debugged in any IDE, so nothing is hidden at runtime.
+* Can be used alongside widely used technologies, including JPA, depending on setup.
+* Designed to be portable and usable with most JDBC drivers and common DI/containers.
+* Explicit SQL with reusable mappers and converters in common cases.
+* Small surface area and a short learning curve for common cases.
+* Not intended to cover every possible JDBC use case.
+  Edge cases can still drop down to native JDBC.
+* Supports modern language features such as records and streams in common cases.
+* Converters can often be discovered without manual registration upfront.
+* Stateless operation: all you need is a JDBC connection; no sessions to
+  maintain.
+* Default cases require only minimal annotations.
+
+## When to use **Kaumei&nbsp;JDBC**
+**Kaumei&nbsp;JDBC** is ideal when:
+* You bring your own SQL and want **Kaumei&nbsp;JDBC** to process it as-is.
+* You value fast start-up times.
+* You build **microservices** with simple database access and strict latency targets.
+* You create **scripts and tools** that execute SQL directly.
+* You modernise legacy code and want a JDBC replacement without reflection-heavy frameworks.
+* You plan to compile your Java application to native code and can validate compatibility.
+
+## When not to use it
+**Kaumei&nbsp;JDBC** might not be the best choice if:
+* You maintain complex object-oriented domain models with many relationships in
+  Java.
+* Your domain model drives SQL generation rather than the other way around.
+* You require transparent caching of Java objects.
+* You must support several database back-ends simultaneously.
+  You also rely on many vendor-specific SQL or NoSQL features.
+* You expect your Java model to generate your database schema.
+
+## What **Kaumei&nbsp;JDBC** is not
+* An ORM framework like Hibernate or JPA.
+* A query builder like jOOQ.
+* A tool that accelerates SQL by adding caches.
+  The goal is to stay close to hand-written SQL.
+
+[jdbc-doc]: https://www.oracle.com/java/technologies/javase/javase-tech-database.html

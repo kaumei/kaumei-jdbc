@@ -1,0 +1,42 @@
+---
+title: JPA integration
+description: JPA integration with Kaumei JDBC
+---
+import { Code } from '@astrojs/starlight/components';
+import { extractCodePart } from '../utils.ts';
+import provider from '/root/jdbc-integration/jdbc-spring/src/main/java/io/kaumei/jdbc/examples/spring/jpa/JpaConnectionProvider.java?raw';
+import config from '/root/jdbc-integration/jdbc-spring/src/main/java/io/kaumei/jdbc/examples/spring/jpa/SpringJpaConfig.java?raw';
+
+## Spring JPA with Hibernate
+
+Configure `LocalContainerEntityManagerFactoryBean` with the same `DataSource` used by **Kaumei&nbsp;JDBC**.
+Add `setJpaDialect(new HibernateJpaDialect())` so Spring knows how to access the Hibernate session.
+With that in place `DataSourceUtils.getConnection` returns the transaction-bound connection.
+Flush the session before executing native SQL to ensure pending entity changes reach the database.
+
+Implement a `JdbcConnectionProvider` that flushes the session and exposes the connection:
+
+<Code
+  code={extractCodePart(provider, "jpa")}
+  lang="java"
+  title='JpaConnectionProvider.java'
+/>
+
+Inject the provider into your generated classes via the Spring configuration:
+
+<Code
+  code={extractCodePart(config, "jpa")}
+  lang="java"
+  title='SpringJpaConfig.java'
+/>
+
+### References
+
+* [Spring: JPA setup][spring-jpa]
+
+## Other frameworks
+
+This configuration has not been tested beyond Spring.
+Frameworks that expose the `EntityManager` and `DataSource` can reuse the same pattern.
+
+[spring-jpa]: https://docs.spring.io/spring-framework/reference/data-access/orm/jpa.html#orm-jpa-setup-lemfb

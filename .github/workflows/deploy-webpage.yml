@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: 2025 kaumei.io
+# SPDX-License-Identifier: Apache-2.0
+name: Deploy docs to kaumei-jdbc.kaumei.io
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - webpage
+
+concurrency:
+  group: "webpage"
+  cancel-in-progress: false
+
+jobs:
+  build-deploy-webpage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+
+      - name: Install dependencies
+        working-directory: docs
+        run: npm install
+
+      - name: Build docs
+        working-directory: docs
+        run: npm run build
+        env:
+          ASTRO_PREVIEW: "0"
+          ASTRO_SITE: "https://kaumei-jdbc.kaumei.io"
+          ASTRO_BASE: "/"
+
+      - name: Deploy to public repo
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          personal_token: ${{ secrets.DEPLOY_TOKEN }}
+          external_repository: kaumei/kaumei-jdbc-docs
+          publish_branch: gh-pages
+          publish_dir: docs/dist

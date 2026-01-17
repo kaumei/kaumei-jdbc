@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2025 kaumei.io
+# SPDX-License-Identifier: Apache-2.0
+name: Task or technical work
+description: A concrete technical task or improvement
+title: "[Task] "
+labels: ["task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template is for concrete technical tasks.
+        Not for questions or general discussion.
+
+  - type: textarea
+    id: task
+    attributes:
+      label: Task description
+      description: What needs to be done?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why is this needed? Link to issues, PRs or discussions if relevant.
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      validations:
+        required: false

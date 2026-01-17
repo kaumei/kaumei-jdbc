@@ -1,0 +1,66 @@
+---
+title: Example
+description: A simple example for Kaumei JDBC
+---
+import { Code } from '@astrojs/starlight/components';
+import { extractCodePart } from '../utils.ts';
+import Link from '../../../components/Link.astro';
+import sqlCode  from '/root/jdbc-processor-spec/src/main/resources/h2_create_db.sql?raw';
+import javaCode from '/root/jdbc-processor-spec/src/main/java/io/kaumei/jdbc/docs/SimpleExample.java?raw';
+import testCode from '/root/jdbc-processor-spec/src/test/java/io/kaumei/jdbc/docs/SimpleExampleTest.java?raw';
+
+## Create the SQL table
+Create a simple `customer` table in your database.
+<Code code={extractCodePart(sqlCode, "db_customers")} lang="sql" title='customer.sql'/>
+
+
+## Define the row data
+Define a record to hold one row of the table.
+If your Java names do not match the SQL names, use the `@JdbcName` annotation to map them to SQL names.
+<Code code={extractCodePart(javaCode, "CustomerAsRecord")} lang="java" />
+
+**Kaumei&nbsp;JDBC** performs null checks in line with [JSpecify](https://jspecify.dev).
+
+If you define plain Java classes:
+<Code code={extractCodePart(javaCode, "CustomerAsClass")} lang="java" />
+
+The `created` property uses `LocalDateTime`, which JDBC does not handle natively.
+Add a converter to translate between `java.sql.Timestamp` and `java.time.LocalDateTime`.
+You can use any name as converter method.
+<Code code={extractCodePart(javaCode, "LocalDateTime")} lang="java" />
+
+
+## Define the select statements
+Return the table contents as a `List` or a `Stream`.
+See the <Link ref="/guides/spec/jdbc-select">select guide</Link> for more details.
+<Code code={extractCodePart(javaCode, "select")} lang="java" />
+
+You can also return a single scalar value:
+<Code code={extractCodePart(javaCode, "countCustomers")} lang="java" />
+
+
+## Insert data
+The table defines two auto generated columns that you want to return from each insert.
+Create a record to capture those generated values.
+In this case the SQL and Java field names match.
+<Code code={extractCodePart(javaCode, "Gen")} lang="java" />
+
+Next, define the insert SQL.
+See the <Link ref="/guides/spec/jdbc-update">update guide</Link> for further details.
+<Code code={extractCodePart(javaCode, "insert")} lang="java" />
+
+
+## The full example
+Combine all components into a single Java interface:
+<Code code={extractCodePart(javaCode, "class")} lang="java" title='SimpleExample.java'/>
+
+
+## How to use it
+The annotation processor generates the implementation `SimpleExampleJdbc` alongside the interface.
+Create an instance and call the generated methods:
+
+<Code code={extractCodePart(testCode, "example")} lang="java" title='SimpleExampleTest.java'/>
+
+The example uses a minimal `JdbcConnectionProvider`.
+To integrate with frameworks such as Spring, Micronaut, or Quarkus,
+see the <Link ref="/guides/integration/00-overview">integration overview</Link>.

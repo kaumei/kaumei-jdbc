@@ -1,0 +1,39 @@
+---
+title: ✅ JDBC native
+---
+import SpecTest from '../../../components/SpecTest.astro';
+import { Code, Aside } from '@astrojs/starlight/components';
+import { extractCodePart } from '../utils.ts';
+import example from '/root/jdbc-processor-spec/src/main/java/io/kaumei/jdbc/docs/NativeCodeExample.java?raw';
+
+<SpecTest title="Exception"   test="io.kaumei.jdbc.spec.nativecode.NativeCodeExceptionTest" /> 
+<SpecTest title="General"     test="io.kaumei.jdbc.spec.nativecode.NativeCodeGeneralTest" /> 
+<SpecTest title="Not found"   test="io.kaumei.jdbc.spec.nativecode.NativeCodeNotFoundTest" /> 
+<SpecTest title="Parameter"   test="io.kaumei.jdbc.spec.nativecode.NativeCodeParameterTest" /> 
+<SpecTest title="Return type" test="io.kaumei.jdbc.spec.nativecode.NativeCodeReturnTest" /> 
+
+Sometimes a developer needs to work with the `Connection` directly, create statements,
+execute them, and process the results in a way that the annotations do not cover.  
+The annotation processor therefore provides a mechanism to call a hand-written method.
+
+* Bridges to a user-provided static method; by default the processor searches
+  within the same interface, while `cls` and `method` override the target.
+* The target method must be static and accept a `java.sql.Connection` as its
+  first parameter, followed by the interface parameters in the same order and type.
+  * The first parameter must be `java.sql.Connection`.
+  * The remaining parameters must match the interface method in count and type.
+  * The return type must be assignable to the interface method's return type.
+  * Nullness semantics must stay compatible between source and target signatures.
+* Exception handling:
+  * Any `SQLException` is wrapped in `JdbcException`.
+  * All other exceptions must either be runtime exceptions or be type-compatible
+    with the interface method signature.
+
+<Aside>
+* Do not close the connection yourself, close all other resources you have created with in this method.
+* Do not change the transaction isolation level or commit inside your handwritten method.
+</Aside>
+
+
+## Example
+<Code code={extractCodePart(example, "nativeCode")} lang="java" title='Simple example' />

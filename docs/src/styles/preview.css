@@ -1,0 +1,20 @@
+body::before {
+  content: "PREVIEW";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-20deg);
+  font-size: clamp(3rem, 10vw, 10rem);
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+  z-index: 9999;
+  text-transform: uppercase;
+}
+
+@media (prefers-color-scheme: dark) {
+  body::before {
+    color: rgba(255, 255, 255, 0.08);
+  }
+}

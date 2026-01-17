@@ -1,0 +1,74 @@
+---
+title: SQL update
+description: A guide to use SQL update
+---
+import { Code } from '@astrojs/starlight/components';
+import { extractCodePart } from '../utils.ts';
+//import javaCode from '/root/README.md'; //'/root/jdbc-processor-spec/src/main/java/io/kaumei/jdbc/examples/docs/update/JdbcUpdateApi.java?raw';
+//import javaTest from '/root/README.md'; //'/root/jdbc-processor-spec/src/test/java/io/kaumei/jdbc/examples/docs/update/JdbcUpdateApiTest.java?raw';
+//import sqlCode  from '/root/README.md'; //'/root/jdbc-processor-spec/src/main/resources/postgresql_create_db.sql?raw';
+
+## Execute updates
+
+You can execute SQL updates with the `@JdbcUpdate` annotation, like
+
+{/*<Code code={extractCodePart(javaCode, "deleteAndReturnVoid")} lang="java"/>*/}
+
+In this case the method return `void`.
+
+If you need the number of updates returning by `stmt.executeUpdate`, you define the return value `int`:
+
+{/*<Code code={extractCodePart(javaCode, "deleteAndReturnInt")} lang="java"/>*/}
+
+Sometime you only want to known if something was changed , in this case you can return simple `boolean`:
+
+{/*<Code code={extractCodePart(javaCode, "deleteAndReturnBoolean")} lang="java"/>*/}
+
+
+## Execute update and return generated values by GENERATED_KEYS
+
+In this example we have the following table:
+
+{/*<Code code={extractCodePart(sqlCode, "users")} lang="sql" title='users.sql'/>*/}
+
+The `id` is auto increment and the name is set to `$id_name` in case it was null. First we have to define a `record`which can hold both values:
+
+{/*<Code code={extractCodePart(javaCode, "IdName")} lang="java"/>*/}
+
+To get the generated values back with the JDBC style, we need to add
+`@JdbcReturnGeneratedValues(JdbcReturnGeneratedValues.ReturnKind.GENERATED_KEYS)`
+to the method, like this:
+
+{/*<Code code={extractCodePart(javaCode, "insertUsersWithGeneratedKeys")} lang="java"/>*/}
+
+We also support the PostgreSQL `RETRUNING` style, like this:
+
+{/*<Code code={extractCodePart(javaCode, "insertUsersWithReturning")} lang="java"/>*/}
+
+
+## Batch update
+The annotation processor also support to execute batches.
+The the following example we want to add a lot of addresses to the database:
+
+{/*<Code code={extractCodePart(javaCode, "startBatchInsert")} lang="java"/>*/}
+
+With `@JdbcUpdate` you define the SQL. The method must not have any parameter and must return an interface which extends the Kaumei `JdbcBatch` like this:
+
+{/*<Code code={extractCodePart(javaCode, "AddressBatch")} lang="java"/>*/}
+
+The method in the interface has the parameter of the SQL. Now you can easily add as many address as you want.
+The generated code will execute your batch after 1.000 calls to the `add` method and before the batch is close,
+because there are 100 still not send to the database.
+
+{/*<Code code={extractCodePart(javaTest, "startBatchInsert")} lang="java"/>*/}
+
+You can define a custom batch size with the annotation `@JdbcBatchSize` or if you need a dynamic size with a parameter of the `startBatchInsert` method, like the following two examples.
+
+{/*<Code code={extractCodePart(javaTest, "batchSize")} lang="java"/>*/}
+
+Note: You can define `@JdbcBatchSize` at the interface level, in this case it will apply to all batch method of that interface.
+
+
+
+
+  

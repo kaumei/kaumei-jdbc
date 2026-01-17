@@ -1,0 +1,44 @@
+---
+title: Unsorted
+description: A guide to enhance your methods
+---
+import { Code } from '@astrojs/starlight/components';
+import { extractCodePart } from '../utils.ts';
+
+The search order for converter etc. is always the same:
+
+* method
+* interface
+* package
+* config
+* default values from **Kaumei&nbsp;JDBC** (hard coded)
+
+
+## Error handling
+
+* if annotations show up at places we do not assume: we ignore them by JdbcNoRows
+* if annotations show up we assume and have errors: we will throw an UnsupportedOperation exceptions
+
+
+## Interface method annotations
+The following annotation are only processed at interfaces methods, which are not default.
+* `@JdbcNative` (type)
+* `@JdbcSelect` (type)
+* `@JdbcUpdate` (type)
+
+
+## Type/Method annotations
+To define common converter we support two annotations. 
+
+* `@JdbcToJava` (type, method)
+* `@JavaToJdbc` (type, method)
+
+You can place the annotation at static methods which have the visibility public or package.
+You can move the annotation to the type, in this case all valid methods will be tread as converter.
+
+## Change default behavior
+* `@JdbcConstructorAnnotations` (type)
+
+Currently not used:
+* `@JdbcConfig`
+* `@JdbcNameMapping`

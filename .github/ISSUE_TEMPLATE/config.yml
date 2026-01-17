@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: 2025 kaumei.io
+# SPDX-License-Identifier: Apache-2.0
+blank_issues_enabled: false
+contact_links:
+  - name: Ideas, questions and discussions
+    url: https://github.com/kaumei/kaumei-jdbc/discussions
+    about: Please use GitHub Discussions for ideas, design proposals and questions.

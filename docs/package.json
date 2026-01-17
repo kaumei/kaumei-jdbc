@@ -1,0 +1,22 @@
+{
+  "name": "kaumei-jdbc-docs",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/markdoc": "^0.15.10",
+    "@astrojs/starlight": "^0.37.2",
+    "@astrojs/starlight-markdoc": "^0.5.1",
+    "@expressive-code/plugin-collapsible-sections": "^0.41.5",
+    "astro": "^5.16.9",
+    "remark-custom-heading-id": "^2.0.0",
+    "sharp": "^0.34.5",
+    "starlight-links-validator": "^0.19.2"
+  }
+}

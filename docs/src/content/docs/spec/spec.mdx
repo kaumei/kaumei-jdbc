@@ -1,0 +1,77 @@
+---
+title: ✅ Overview
+---
+import SpecTest from '../../../components/SpecTest.astro';
+import Link from '../../../components/Link.astro';
+
+## Disclaimer
+This specification tracks an active development effort and may change without notice,
+including breaking updates when needed for correctness. Icons indicate test coverage:
+✅ fully covered via black-box tests, 🟡 only partially covered.
+
+
+## ✅ Purpose and Scope 
+The Kaumei JDBC annotation processor turns annotated Java
+interfaces into executable JDBC adapters at compile time.
+This specification defines the contract between the interface author and the generated
+implementation, including supported annotations, converter lookup, and error handling.
+
+## ✅ Generated Implementation Contract
+<SpecTest test="io.kaumei.jdbc.spec.general.GeneralTest" /> 
+* For every processed interface the processor emits `<InterfaceName>Jdbc`
+  in the same package, annotated with `@Generated`.
+* ✅ If the generated file already exists, the annotation processor
+  prints an error message.
+* The generated class implements the interface and exposes a single
+  public constructor that takes a `JdbcConnectionProvider`.
+  The provider is used to obtain connections for every method invocation.
+* Interface-level annotations other than Kaumei-specific ones are copied
+  to the generated class. `@JdbcConstructorAnnotations` defines additional
+  annotations, which are coped onto the constructor.
+* Only instance, non-default, non-static methods participate in generation.
+* Unprocessed methods throw an `CodeGenerationException`. 
+
+## ✅ Supported Method Annotations 
+The annotation processor support
+* <Link ref="/spec/jdbc-select">JDBC select</Link>
+* <Link ref="/spec/jdbc-update">JDBC update (incl batches)</Link>
+* <Link ref="/spec/jdbc-native">Native SQL</Link>
+* currently not supported: 
+  * JDBC calls
+  * result set updates
+
+## ✅ Support of `null` checks and `Optional<T>`
+The **Kauei&nbsp;JDBC** support `null` checks according the 
+[JSpecify](https://jspecify.dev) specification.
+The tool checks the parameter and the return type of a methods and add additional null
+checks, if needed. If there are no annotations, the code will add no extra checks.
+
+We will use the following wording in this specification:
+* `nullable`: the type may hold null values.
+* `non-null`: the type must not hold null values
+* `unspecified`: the default when no JSpecify annotation is present.
+  This will be every typ for which the tool can not calculate one of `nullable` or `non-null`. 
+
+The  `Optional<T>` type is not supported as parameter (according to its specification). 
+It is primary for return values only. The type and its parameter `T` is always treaded as `non-null`.
+Other annotations will be rejected. 
+
+<SpecTest test="io.kaumei.jdbc.spec.java2jdbc.NullSafetyConverterSimpleSpecTest" />
+<SpecTest test="io.kaumei.jdbc.spec.java2jdbc.NullSafetyConverterStatementSpecTest" />
+<SpecTest test="io.kaumei.jdbc.spec.java2jdbc.NullSafetyValueSpecTest" />
+
+
+## ✅ Statement Configuration
+The following annotations customise the generated statement handling and may appear
+on methods or parameters as documented in the user guide:
+* `@JdbcFetchSize`, `@JdbcFetchDirection`, `@JdbcMaxRows`, `@JdbcQueryTimeout`, 
+  `@JdbcResultSetType`, `@JdbcResultSetConcurrency`.
+* `@JdbcBatchSize` accepts either a constant value on the method or a dedicated parameter.
+  Exactly one batch-size parameter may be present.
+* `@JdbcName` on parameters rewrites the named placeholder, while on methods it
+  defines the expected column label for single-column selects.
+
+## Configuration  
+* Enable extra debug logging for elements with `@JdbcDebug` at that element.
+  This is used by the developers during bug fixing.
+

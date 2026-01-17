@@ -1,0 +1,41 @@
+---
+title: SQL native JDBC
+description: FIXME
+---
+import { Code } from '@astrojs/starlight/components';
+import { extractCodePart } from '../utils.ts';
+//import javaCode    from '/root/README.md'; //'/root/jdbc-processor-spec/src/main/java/io/kaumei/jdbc/examples/docs/NativeCode.java?raw';
+//import javaCodeLib from '/root/README.md'; //'/root/jdbc-processor-spec/src/main/java/io/kaumei/jdbc/examples/docs/NativeCodeLib.java?raw';
+
+We want to provide annotation processing for the most cases you find in your application.
+We known that there will be corner cases which could not be solved in a nice clean and simple way.
+
+For those situation you can still mix your "special agent code" for "special situations" with the simple Jdbc annotaitons.
+You can use all methods from the jdbc-core libs and the generated code.
+
+You provide your special code, which must be a static function,
+with its first parameter must be of kind `java.sql.Connection`.
+Than you define the same method with compatible return value, paramter and throws.
+
+The annotation process will automatic call the static `nativeCode` with the correct connection.
+
+{/*
+<Code code={extractCodePart(javaCode, "nativeCode")} lang="sql" title='NativeCode.java'/>
+*/}
+
+If you not provide any more information to `@JdbcNative` the annotation processor will look in the same interface for a static method with same name.
+
+
+Sometimes your code will stay in other places.
+For this you can define the class and the method name, which should be called.
+
+In the next example we have a method in `NativeCodeLib.java`
+{/*
+<Code code={extractCodePart(javaCodeLib, "otherNativeCode")} lang="sql" title='NativeCodeLib.java'/>
+*/}
+which should be called from the interface `NativeCode`
+{/*
+<Code code={extractCodePart(javaCode, "otherNativeCode")} lang="sql" title='NativeCode.java'/>
+*/}
+If the method in the interface has the return type `void` 
+annotation processing will dismiss the type of the called method.

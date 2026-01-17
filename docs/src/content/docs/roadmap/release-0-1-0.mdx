@@ -1,0 +1,64 @@
+---
+title: Release 0.1.0
+description: First public preview of **Kaumei&nbsp;JDBC** on the road to 1.0.
+---
+import Link from '../../../components/Link.astro';
+
+## Overview
+
+**Kaumei&nbsp;JDBC** 0.1.0 is our first public preview.
+It focuses on proving that annotation processing can generate practical JDBC code
+without hiding SQL or leaning on reflection.
+Expect APIs to change before 1.0.0, but the core experience is ready for early
+adopters.
+
+## Highlights
+
+* **code generation**:
+  Annotated interfaces automatically gain JDBC implementations with compile-time
+  binding validation.
+* **SQL-first workflow**:
+  `@JdbcSelect`, `@JdbcUpdate`, `@JdbcBatch`, and `@JdbcNative` keep SQL inline so
+  reviews always see the queries being executed.
+* **Type-safe mapping**:
+  Map records, enums, and records, and register converters with `@JdbcToJava` or
+  `@JavaToJdbc` for bidirectional conversions.
+* **Batch execution**:
+  Run batch updates with static or dynamic sizes while the generated code manages
+  parameter binding and resource cleanup.
+* **Generated values**:
+  Capture keys or columns from single-row updates directly into Java types.
+* **Modern collections**:
+  Return `List`, `Stream`, or scalar values from  methods.
+* **Integration hooks**:
+  Runtime code only needs a `JdbcConnectionProvider`, making it easy to wire into
+  Spring, Micronaut, Quarkus, or plain Java apps.
+
+## Installation
+
+Artifacts perform as `0.1.0` on Maven Central.
+Follow the <Link ref="/intro/installation">installation guide</Link> to add
+`jdbc-annotation`, `jdbc-core`, and `jdbc-processor` with the same version and to
+enable annotation processing in your build.
+
+## Known limitations
+* IntelliJ occasionally drops annotation-processing classpath entries.
+  If generated code is missing in the IDE, run `mvn compile` to confirm the
+  build works; we are working on this.
+* Loading SQL from the classpath via prefixes such as `include:` or `classpath:`.
+* Calling stored procedures.
+* Error messages can be improved.
+
+## Road to 1.0.0
+
+The road to 1.0.0 will be driven if there are 
+During the 0.x series we will:
+
+* check, if developers like this tool
+* Stabilize the annotation processor output and contract tests.
+* Fill the remaining converter and integration gaps.
+* Improve diagnostics when code generation fails.
+
+If there is little interest or feedback, the project may simply stay as it is.
+
+Feedback is welcome on [GitHub discussions](https://github.com/kaumei/kaumei-jdbc/discussions) or [issues](https://github.com/kaumei/kaumei-jdbc/issues).

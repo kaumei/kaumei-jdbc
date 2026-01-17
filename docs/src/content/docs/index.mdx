@@ -1,0 +1,31 @@
+---
+title: Welcome to Kaumei JDBC
+tableOfContents: false
+---
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import Link from '../../components/Link.astro';
+
+**Kaumei&nbsp;JDBC** aims to give you the control of hand-written SQL with better safety,
+ergonomics, and observability than heavier frameworks.
+It keeps SQL front and center while compiling the boring JDBC plumbing for you.
+If you cannot wait, start right away with the <Link ref="/intro/installation">installation guide</Link>.
+More context before adopting is provided in <Link ref="/intro/why-kaumei">Why **Kaumei&nbsp;JDBC**</Link>.
+
+<CardGrid>
+	<Card title="Compile-time checks" icon="approve-check">
+		Annotation processing generates DAO implementations and validates bindings up front.
+	</Card>
+	<Card title="SQL-first workflow" icon="terminal">
+		`@JdbcSelect`, `@JdbcUpdate`, `@JdbcBatch`, and `@JdbcNative` keep queries inline and reviewable.
+	</Card>
+	<Card title="Integration friendly" icon="extension">
+		You can wire **Kaumei&nbsp;JDBC** into Spring, Micronaut, or Quarkus by injecting `JdbcConnectionProvider`.
+	</Card>
+	<Card title="Modern Java features" icon="sparkles">
+		Records, enums, custom converters, and collections like `List` or `Stream` are supported in common cases.
+	</Card>
+</CardGrid>
+
+> **0.1.0 preview**  
+> Our first public preview is planned next.
+> Read the <Link ref="/roadmap/release-0-1-0">Release 0.1.0 note</Link> for highlights and the road to 1.0.0.

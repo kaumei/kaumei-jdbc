@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: 2025 kaumei.io
+# SPDX-License-Identifier: Apache-2.0
+name: Feature or change request
+description: Propose a concrete, well-defined feature or behaviour change
+title: "[Feature] "
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Issues are used only for concrete, actionable work items.
+
+        If this is an idea, an open-ended proposal, or requires design discussion,
+        please open a GitHub Discussion first.
+
+  - type: input
+    id: discussion
+    attributes:
+      label: Related discussion
+      description: Link to a GitHub Discussion, if this was discussed first.
+      placeholder: https://github.com/.../discussions/...
+    validations:
+      required: false
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem does this solve? What is the concrete use case?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Describe the feature or behaviour change clearly.
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact and considerations
+      description: API impact, compatibility, performance, maintenance concerns.
+    validations:
+      required: false

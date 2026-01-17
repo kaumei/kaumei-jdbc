@@ -1,0 +1,145 @@
+---
+title: Roadmap
+description: A brief overview of the next steps
+---
+import Link from '../../../components/Link.astro';
+
+## Features/Ideas
+There is no order of next features.
+
+### Support to load the SQL from a file
+Sometimes the SQL turns out to be bigger in case of scripts to execute
+with process call or developers like to store the sql with file ending .sql
+to have better IDE support while writing oder executing the script.
+
+The value of the SQL starts with one of the following:
+
+| Prefix       | Action                                                               |
+| ------------ | -------------------------------------------------------------------- |
+| `include:`   | copy from compile classpath during annotation processing             |
+| `classpath:` | Thread.currentThread().getContextClassLoader().getResourceAsStream() |
+| all others   | SQL is used directly                                                 |
+
+
+### Multiple project support
+Enable the support to use **Kaumei&nbsp;JDBC** with more than one project.
+Mainly we should add support to reuse global converter from user projects.
+In common cases Java projects do not exists with exact one JAR.
+In most cases we have several JARs which all contain different parts of the software, e.g.
+* several different data access JARs,
+* JARs with common enums and types
+* domain values and classes
+We need to support to share `@JdbcToJava` and `@JavaToJdbc` definition,
+so we must not define things twice and can reuse code.
+
+Ideas: 
+* collect all converters in one class file and reference that in a config manually
+* generate a class which references all annotated methods `@JdbcToJava` and `@JavaToJdbc` 
+  * this file can be referenced in other JARs
+
+
+### JavaToJdbc: Add 'row' support
+Sometime we have all values for a SQL insert colleted into one Java object.
+Currently we could not hand over this object to the JDBC method.
+Currently the values must be past one by one. 
+Most likely this show up with insert new rows into a table. 
+* unclear how we could do that
+* do we need support for row name mapping
+* check, how we should do row name mapping
+  * with or without name prefix
+* investigate to support JPA entities as parameter
+* Idea
+  ```java
+  @JdbcUpdate("INSERT INTO :customer:names VALUES (:customer:values)")
+  ExampleRow insertAndReturn(ExampleInsert customer) {
+  ```
+* Currently no use case is provided.
+
+
+### Support to execute calls
+Users want to execute stored procedures and want to pass SQL procedures to the database.
+Support is needed for in and our parameter.
+We wan also to load those SQL procedures from the classpath.
+Currently no use case is provided.
+
+
+### Support to execute SQL script
+Do we need support to execute some kind of SQL scripts? 
+* A whole script defined by """...""" or from the classpath
+* Defined lines line by line
+* Unclear on how it should be executed
+
+
+### Support to have only ? in the SQL code
+Users want not to define names for there parameters.
+In this cases we want to support a mapping by position.
+This can only be done on the following cases:
+* the SQL does not contain any names, e.g. ":name"
+* the number of ? is less or equal to the number of method parameters
+* optional: add an annotation so we can define which positions should be used for this paramter `@JdbcPos({1,6,9})`
+* if not all ? can be set with method parameters the method will not be generated
+
+
+### Support for a light way **Kaumei&nbsp;TX** (not yet finished by end of 2025)
+* Still work in progress.
+* we do not want any static references like Spring TX
+* idea: warp a DataSource and provide a wrapped connection, which enabled TX support
+  * wrap the native JDBC connection to `io.kaumei.jdbc.tx.TxConnection`
+* support for:
+  * start tx
+  * commit tx
+  * rollback tx
+  * mark TX for collback
+  * finish tx (will) 
+* add support for transaction new
+* move to DataSource, because we need newConnection if we want support tx new with in a normal transaction
+* support for execute (check what Spring TX supports)
+  * before commit
+  * after commit
+  * in case of rollback
+
+
+### Configuration for name of factory methods (if some one provides a use case)
+* currently we support the standard `valueOf` factory method
+* in some use cases we need a more flexible approach, you do do not have to annotate to mana methods with `@JdbcToJava`
+
+### Check if we can add default converter for common database types
+We should not provide default converter, because SQL database and JDBC driver
+may handle those Objects different. Perhaps we can offer converter for the 
+most common databases like (https://db-engines.com/en/ranking):
+* Oracle
+* MySQL
+* Microsoft SQL Server
+* PostgreSQL
+* H2Database
+* JavaDB
+
+Before we can use this, we should support multi projects.
+
+Possible Datatypes:
+* BigDecimal, BigInteger
+* LocalDate,  LocalDateTime, LocalTime
+* OffsetDate, OffsetDateTime
+* ZonedDateTime
+* Year, YearMonth
+* Period
+* OffsetTime
+* DayOfWeek
+* Instant
+* java.util.Date and java.util.Time
+* java.sql.Date and java.sql.Time
+
+
+### Support Avaje integration
+* Investigate if we can use **Kaumei&nbsp;JDBC** with [Avaje inject](https://avaje.io/inject/)
+
+
+### Support Jdbi integration
+* Investigate if we can use **Kaumei&nbsp;JDBC** with [Jdbi](https://jdbi.org)
+* Jdbi integration
+
+
+### Updates on ResultSets 
+* currently not supported due missing use case
+
+

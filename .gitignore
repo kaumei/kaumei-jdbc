@@ -1,0 +1,11 @@
+# Mac
+.DS_Store
+
+# Maven
+target
+
+# IDE
+*.iml
+
+# Personal
+my_*
