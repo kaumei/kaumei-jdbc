@@ -130,6 +130,8 @@ class GenerateJdbcSelect implements GenerateJdbc {
         var noRows = genService.jdbcConfigService.searchAnno(Anno.JDBC_NO_ROWS, this.methodAnnotations, this.method.getEnclosingElement());
         if (noRows == JdbcNoRows.Kind.RETURN_NULL && methodReturn.optional().isNonNull()) {
             body.addError(Msg.of("@JdbcSelect incompatible: " + noRows + " and '" + methodReturn.optional() + "'"));
+        } else if (noRows == JdbcNoRows.Kind.THROW_EXCEPTION && methodReturn.optional().isOptionalType()) {
+            body.addError(Msg.of("@JdbcSelect incompatible: " + noRows + " and '" + methodReturn.optional() + "'"));
         } else {
             body.addCheckHasRows(noRows, methodReturn.optional());
         }

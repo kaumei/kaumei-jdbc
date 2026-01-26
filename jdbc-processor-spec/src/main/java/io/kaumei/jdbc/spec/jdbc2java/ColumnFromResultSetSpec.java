@@ -9,6 +9,7 @@ import io.kaumei.jdbc.annotation.JdbcConverterName;
 import io.kaumei.jdbc.annotation.JdbcName;
 import io.kaumei.jdbc.annotation.JdbcSelect;
 import io.kaumei.jdbc.annotation.JdbcToJava;
+import io.kaumei.jdbc.annotation.config.JdbcNoRows;
 import io.kaumei.jdbc.spec.common.*;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -37,9 +38,11 @@ public interface ColumnFromResultSetSpec {
     @JdbcSelect("SELECT :value")
     RecordInt recordInt(Integer value);
 
+    @JdbcNoRows(JdbcNoRows.Kind.RETURN_NULL)
     @JdbcSelect("SELECT :value")
     Optional<RecordInt> optionalRecordInt(Integer value);
 
+    @JdbcNoRows(JdbcNoRows.Kind.RETURN_NULL)
     @JdbcName("value1")
     @JdbcSelect("SELECT :value as value1")
     Optional<RecordInt> optionalRecordIntWithJdbcName(Integer value);

@@ -18,6 +18,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.type.TypeMirror;
 import java.util.Objects;
+import java.util.Optional;
 
 class ConverterRowObjects extends Jdbc2JavaConverter {
 
@@ -72,7 +73,7 @@ class ConverterRowObjects extends Jdbc2JavaConverter {
     }
 
     @Override
-    protected void addResultSetToRow0(KaumeiMethodBodyBuilder builder, String localVarName) {
+    protected void addResultSetToRow0(KaumeiMethodBodyBuilder builder, String localVarName, OptionalFlag optional) {
         builder.addComment("ConverterRowObjects.addResultSetToRow", "type", type());
         CodeBlock.Builder args = CodeBlock.builder();
         for (int i = 0; i < paramLength; i++) {
@@ -92,9 +93,21 @@ class ConverterRowObjects extends Jdbc2JavaConverter {
         if (builder.hasErrors()) {
             builder.addError(Msg.invalidConverter(this.type()));
         } else if (isMethod) {
-            builder.addStatement("var $L = $T.$N($L)", localVarName, this.typeElement, this.methodName, args.build());
+            if (optional.isOptionalType()) {
+                builder.addStatement("var $L = $T.of($T.$N($L))",
+                        localVarName, Optional.class, this.typeElement, this.methodName, args.build());
+            } else {
+                builder.addStatement("var $L = $T.$N($L)",
+                        localVarName, this.typeElement, this.methodName, args.build());
+            }
         } else {
-            builder.addStatement("var $L = new $T($L)", localVarName, this.typeElement, args.build());
+            if (optional.isOptionalType()) {
+                builder.addStatement("var $L = $T.of(new $T($L))",
+                        localVarName, Optional.class, this.typeElement, args.build());
+            } else {
+                builder.addStatement("var $L = new $T($L)",
+                        localVarName, this.typeElement, args.build());
+            }
         }
     }
 }

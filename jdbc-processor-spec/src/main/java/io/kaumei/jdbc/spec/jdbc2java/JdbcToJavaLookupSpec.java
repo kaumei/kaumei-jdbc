@@ -5,7 +5,6 @@
 
 package io.kaumei.jdbc.spec.jdbc2java;
 
-import io.kaumei.jdbc.annotation.JdbcDebug;
 import io.kaumei.jdbc.annotation.JdbcSelect;
 import io.kaumei.jdbc.annotation.JdbcToJava;
 import org.jspecify.annotations.Nullable;
@@ -68,7 +67,6 @@ public interface JdbcToJavaLookupSpec {
         }
     }
 
-    @JdbcDebug
     @JdbcSelect("select 1")
     InvalidClassToManyAnnotatedMethods invalidClassToManyAnnotatedMethods();
 

@@ -6,10 +6,8 @@
 package io.kaumei.jdbc.spec.jdbc2java;
 
 
-import io.kaumei.jdbc.annotation.JdbcConverterName;
-import io.kaumei.jdbc.annotation.JdbcName;
-import io.kaumei.jdbc.annotation.JdbcSelect;
-import io.kaumei.jdbc.annotation.JdbcToJava;
+import io.kaumei.jdbc.annotation.*;
+import io.kaumei.jdbc.annotation.config.JdbcNoRows;
 import io.kaumei.jdbc.spec.NoJdbcType;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -35,6 +33,18 @@ public interface RowFromObjectsSpec {
 
     @JdbcSelect("select :value1 as value1, :value2 as value2")
     StringInt stringInt(String value1, Integer value2);
+
+    // ------------------------------------------------------------------------
+    record StringInt2(String value1, int value2) {
+    }
+
+    @JdbcSelect("select col_varchar AS value1, col_int AS value2 from db_types WHERE col_int = :value2")
+    @JdbcNoRows(JdbcNoRows.Kind.RETURN_NULL)
+    Optional<StringInt2> stringIntOptional(int value2);
+
+    @JdbcSelect("select 1")
+    @JdbcNoRows(JdbcNoRows.Kind.THROW_EXCEPTION)
+    Optional<StringInt2> stringIntOptionalInvalid();
 
     // ------------------------------------------------------------------------
     record StringIntNullable(String value1, int value2) {

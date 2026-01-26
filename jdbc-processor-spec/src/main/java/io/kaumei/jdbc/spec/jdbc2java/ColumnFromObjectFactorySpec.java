@@ -7,6 +7,7 @@ package io.kaumei.jdbc.spec.jdbc2java;
 
 import io.kaumei.jdbc.annotation.JdbcName;
 import io.kaumei.jdbc.annotation.JdbcSelect;
+import io.kaumei.jdbc.annotation.config.JdbcNoRows;
 import io.kaumei.jdbc.spec.NoJdbcType;
 import io.kaumei.jdbc.spec.common.*;
 import org.jspecify.annotations.Nullable;
@@ -31,10 +32,12 @@ public interface ColumnFromObjectFactorySpec {
     @JdbcSelect("SELECT :value") RecordStringNullable recordStringNullable(); // invalid
     // @formatter:on
 
+    @JdbcNoRows(JdbcNoRows.Kind.RETURN_NULL)
     @JdbcSelect("SELECT :value")
     Optional<RecordString> optionalRecordString(String value);
 
     @JdbcName("value1")
+    @JdbcNoRows(JdbcNoRows.Kind.RETURN_NULL)
     @JdbcSelect("SELECT :value as value1")
     Optional<RecordString> optionalRecordStringWithName(String value);
 

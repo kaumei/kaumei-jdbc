@@ -231,14 +231,14 @@ public class KaumeiMethodBodyBuilder {
             }
             lambda.add("(rs) -> {\n");
             lambda.indent();
-            converter.addColumnByIndex(lambda, "row", index, optional); // FIXME
+            converter.addColumnByIndex(lambda, "row", index, optional);
             lambda.addStatement("return row");
             lambda.unindent();
             lambda.add("}");
         } else {
             lambda.add("(rs) -> {\n");
             lambda.indent();
-            converter.addResultSetToRow(lambda, "row"); // FIXME
+            converter.addResultSetToRow(lambda, "row", optional);
             lambda.addStatement("return row");
             lambda.unindent();
             lambda.add("}");
@@ -261,7 +261,7 @@ public class KaumeiMethodBodyBuilder {
                 converter.addColumnByName(this, localVarName, jdbcName, optional);
             }
         } else {
-            converter.addResultSetToRow(this, localVarName);
+            converter.addResultSetToRow(this, localVarName, optional);
         }
     }
 
@@ -274,7 +274,7 @@ public class KaumeiMethodBodyBuilder {
         if (jdbcToJava.isColumn()) {
             jdbcToJava.addColumnByIndex(this, "result", index, isMandatory);
         } else {
-            jdbcToJava.addResultSetToRow(this, "result");
+            jdbcToJava.addResultSetToRow(this, "result", isMandatory);
         }
         this.addCheckNoMoreRows(noMoreRows);
         this.addStatement("return result");

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static io.kaumei.jdbc.KaumeiAssert.kaumeiThrows;
+import static io.kaumei.jdbc.spec.jdbc2java.RowFromResultSetSpec.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RowFromResultSetSpecTest {
@@ -38,10 +39,31 @@ class RowFromResultSetSpecTest {
     }
 
     void assert_recordStringString(String value1, String value2) {
-        var expected = new RowFromResultSetSpec.RecordStringString(
-                RowFromResultSetSpec.unique(value1, "recordStringString"),
-                RowFromResultSetSpec.unique(value2, "recordStringString"));
+        var expected = new RecordStringString(
+                unique(value1, "recordStringString"),
+                unique(value2, "recordStringString"));
         assertThat(service.recordStringString(value1, value2)).isEqualTo(expected);
+    }
+
+    @Test
+    void recordStringStringOptional() {
+        db.executeSqls(
+                "INSERT INTO db_types (col_varchar,col_int) VALUES(null,     1)",
+                "INSERT INTO db_types (col_varchar,col_int) VALUES('foobar', 2)");
+        // when ... then
+        assertThat(service.recordStringStringOptional(1).orElseThrow())
+                .isEqualTo(new RecordStringString(unique("null", "recordStringString"),
+                        unique("1", "recordStringString")));
+        assertThat(service.recordStringStringOptional(2).orElseThrow())
+                .isEqualTo(new RecordStringString(unique("foobar", "recordStringString"),
+                        unique("2", "recordStringString")));
+        assertThat(service.recordStringStringOptional(3)).isEmpty();
+    }
+
+    @Test
+    void recordStringStringOptionalInvalid() {
+        kaumeiThrows(() -> service.recordStringStringOptionalInvalid())
+                .annotationProcessError("@JdbcSelect incompatible: THROW_EXCEPTION and 'Optional<.>'");
     }
 
     // ------------------------------------------------------------------------
@@ -112,9 +134,9 @@ class RowFromResultSetSpecTest {
 
     void assert_classConverter(String value1, String value2) {
         var given = service.classConverter(value1, value2);
-        assertThat(given).isExactlyInstanceOf(RowFromResultSetSpec.ClassConverter.class);
-        assertThat(given.value1).isEqualTo(RowFromResultSetSpec.unique(value1, "classConverter"));
-        assertThat(given.value2).isEqualTo(RowFromResultSetSpec.unique(value2, "classConverter"));
+        assertThat(given).isExactlyInstanceOf(ClassConverter.class);
+        assertThat(given.value1).isEqualTo(unique(value1, "classConverter"));
+        assertThat(given.value2).isEqualTo(unique(value2, "classConverter"));
     }
 
     // ------------------------------------------------------------------------

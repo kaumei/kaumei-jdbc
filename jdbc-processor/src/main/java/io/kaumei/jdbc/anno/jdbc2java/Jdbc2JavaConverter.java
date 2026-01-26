@@ -93,7 +93,7 @@ public class Jdbc2JavaConverter extends Converter {
     // ------------------------------------------------------------------------
 
     // if isColumn == false
-    public final void addResultSetToRow(KaumeiMethodBodyBuilder builder, String localVarName) {
+    public final void addResultSetToRow(KaumeiMethodBodyBuilder builder, String localVarName, OptionalFlag optional) {
         try {
             // sanity-check:on
             if (isColumn()) {
@@ -105,14 +105,14 @@ public class Jdbc2JavaConverter extends Converter {
                 builder.addError(msg);
             } else {
                 cycleDetection = true;
-                addResultSetToRow0(builder, localVarName);
+                addResultSetToRow0(builder, localVarName, optional);
             }
         } finally {
             cycleDetection = false;
         }
     }
 
-    protected void addResultSetToRow0(KaumeiMethodBodyBuilder builder, String localVarName) {
+    protected void addResultSetToRow0(KaumeiMethodBodyBuilder builder, String localVarName, OptionalFlag optional) {
         throw new ProcessorException(); // sanity-check
     }
 

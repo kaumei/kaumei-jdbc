@@ -5,6 +5,7 @@
 
 package io.kaumei.jdbc.anno.jdbc2java;
 
+import io.kaumei.jdbc.anno.OptionalFlag;
 import io.kaumei.jdbc.anno.gen.KaumeiMethodBodyBuilder;
 import io.kaumei.jdbc.anno.store.Converter;
 
@@ -14,6 +15,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.type.TypeMirror;
 import java.util.Objects;
+import java.util.Optional;
 
 class ConverterRowResultSet extends Jdbc2JavaConverter {
 
@@ -44,12 +46,23 @@ class ConverterRowResultSet extends Jdbc2JavaConverter {
     }
 
     @Override
-    protected void addResultSetToRow0(KaumeiMethodBodyBuilder builder, String localVarName) {
+    protected void addResultSetToRow0(KaumeiMethodBodyBuilder builder, String localVarName, OptionalFlag optional) {
         builder.addComment("ConverterRowResultSet.addResultSetToRow", "type", type());
         if (this.isMethod) {
-            builder.addStatement("var $L = $T.$N(rs)", localVarName, this.typeElement, this.methodName);
+            if (optional.isOptionalType()) {
+                builder.addStatement("var $L = $T.of($T.$N(rs))",
+                        localVarName, Optional.class, this.typeElement, this.methodName);
+            } else {
+                builder.addStatement("var $L = $T.$N(rs)",
+                        localVarName, this.typeElement, this.methodName);
+            }
         } else {
-            builder.addStatement("var $L = new $T(rs)", localVarName, this.typeElement);
+            if (optional.isOptionalType()) {
+                builder.addStatement("var $L = $T.of(new $T(rs))",
+                        localVarName, Optional.class, this.typeElement);
+            } else {
+                builder.addStatement("var $L = new $T(rs)", localVarName, this.typeElement);
+            }
         }
     }
 

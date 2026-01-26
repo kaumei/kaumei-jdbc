@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static io.kaumei.jdbc.KaumeiAssert.kaumeiThrows;
-import static io.kaumei.jdbc.spec.jdbc2java.RowFromObjectsSpec.unique;
+import static io.kaumei.jdbc.spec.jdbc2java.RowFromObjectsSpec.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RowFromObjectsSpecTest {
@@ -40,8 +40,25 @@ class RowFromObjectsSpecTest {
     }
 
     void assert_stringInt(String value1, Integer value2) {
-        var expected = new RowFromObjectsSpec.StringInt(unique(value1, "stringInt"), unique(value2));
+        var expected = new StringInt(unique(value1, "stringInt"), unique(value2));
         assertThat(service.stringInt(value1, value2)).isEqualTo(expected);
+    }
+
+    @Test
+    void stringIntOptional() {
+        db.executeSqls(
+                "INSERT INTO db_types (col_varchar,col_int) VALUES(null,     1)",
+                "INSERT INTO db_types (col_varchar,col_int) VALUES('foobar', 2)");
+        // when ... then
+        assertThat(service.stringIntOptional(1).orElseThrow()).isEqualTo(new StringInt2(null, 1));
+        assertThat(service.stringIntOptional(2).orElseThrow()).isEqualTo(new StringInt2("foobar", 2));
+        assertThat(service.stringIntOptional(3)).isEmpty();
+    }
+
+    @Test
+    void stringIntOptionalInvalid() {
+        kaumeiThrows(() -> service.stringIntOptionalInvalid())
+                .annotationProcessError("@JdbcSelect incompatible: THROW_EXCEPTION and 'Optional<.>'");
     }
 
     // ------------------------------------------------------------------------
@@ -55,7 +72,7 @@ class RowFromObjectsSpecTest {
     }
 
     void assert_stringIntNullable(String value1, Integer value2) {
-        var expected = new RowFromObjectsSpec.StringIntNullable(unique(value1, "stringIntNullable"), unique(value2));
+        var expected = new StringIntNullable(unique(value1, "stringIntNullable"), unique(value2));
         assertThat(service.stringIntNullable(value1, value2)).isEqualTo(expected);
     }
 
@@ -71,7 +88,7 @@ class RowFromObjectsSpecTest {
     }
 
     void assert_stringIntNonnull(String value1, Integer value2) {
-        var expected = new RowFromObjectsSpec.StringIntNonnull(unique(value1, "stringIntNonnull"), unique(value2));
+        var expected = new StringIntNonnull(unique(value1, "stringIntNonnull"), unique(value2));
         assertThat(service.stringIntNonnull(value1, value2)).isEqualTo(expected);
     }
 
@@ -86,7 +103,7 @@ class RowFromObjectsSpecTest {
     }
 
     void assert_withNames(String value1, Integer value2) {
-        var expected = new RowFromObjectsSpec.WithNames(unique(value1, "withNames"), unique(value2));
+        var expected = new WithNames(unique(value1, "withNames"), unique(value2));
         assertThat(service.withNames(value1, value2)).isEqualTo(expected);
     }
 
@@ -148,7 +165,7 @@ class RowFromObjectsSpecTest {
     }
 
     void assert_recordConverterAnnotation(String value1, Integer value2) {
-        var expected = new RowFromObjectsSpec.RecordConverterAnnotation(value1, value2);
+        var expected = new RecordConverterAnnotation(value1, value2);
         assertThat(service.recordConverterAnnotation(value1, value2)).isEqualTo(expected);
     }
 
