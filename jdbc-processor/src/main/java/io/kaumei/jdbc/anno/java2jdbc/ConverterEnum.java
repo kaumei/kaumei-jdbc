@@ -11,6 +11,7 @@ import io.kaumei.jdbc.anno.ProcessorException;
 import io.kaumei.jdbc.anno.gen.KaumeiLib;
 import io.kaumei.jdbc.anno.gen.KaumeiMethodBodyBuilder;
 import io.kaumei.jdbc.anno.msg.Msg;
+import io.kaumei.jdbc.anno.store.Converter;
 import io.kaumei.jdbc.anno.store.SearchKey;
 
 import javax.lang.model.type.TypeMirror;
@@ -22,6 +23,13 @@ class ConverterEnum extends Java2JdbcConverter {
     ConverterEnum(TypeMirror type, SearchKey searchKey) {
         super(type);
         this.searchKey = Objects.requireNonNull(searchKey);
+    }
+
+    @Override
+    public boolean isSame(Converter o) {
+        return o instanceof ConverterEnum c
+                && Objects.equals(type, c.type)
+                && Objects.equals(searchKey, c.searchKey);
     }
 
     @Override

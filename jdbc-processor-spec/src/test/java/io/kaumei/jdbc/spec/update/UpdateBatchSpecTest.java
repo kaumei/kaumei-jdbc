@@ -8,6 +8,7 @@ package io.kaumei.jdbc.spec.update;
 import io.kaumei.jdbc.DatasourceExtension;
 import io.kaumei.jdbc.annotation.config.JdbcBatchSize;
 import io.kaumei.jdbc.annotation.config.JdbcQueryTimeout;
+import io.kaumei.jdbc.docs.SimpleExample;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -37,10 +38,10 @@ class UpdateBatchSpecTest {
             assertThat(batch.countAll()).isEqualTo(0);
 
             for (int i = 1; i < batch.bachSize(); i++) {
-                batch.insertAndReturnVoid("a", i);
+                batch.insertAndReturnVoid("a", i, SimpleExample.PricingPlan.FREE);
             }
             assertThat(service.customers("a")).hasSize(0);
-            batch.insertAndReturnVoid("a", 0);
+            batch.insertAndReturnVoid("a", 0, SimpleExample.PricingPlan.FREE);
             assertThat(service.customers("a")).hasSize(batch.bachSize());
         }
     }
@@ -53,10 +54,10 @@ class UpdateBatchSpecTest {
             assertThat(batch.countAll()).isEqualTo(0);
 
             for (int i = 1; i < batch.bachSize(); i++) {
-                batch.insertAndReturnVoid("a", i);
+                batch.insertAndReturnVoid("a", i, SimpleExample.PricingPlan.FREE);
             }
             assertThat(service.customers("a")).hasSize(0);
-            batch.insertAndReturnVoid("a", 0);
+            batch.insertAndReturnVoid("a", 0, SimpleExample.PricingPlan.FREE);
             assertThat(service.customers("a")).hasSize(batch.bachSize());
         }
     }
@@ -133,10 +134,10 @@ class UpdateBatchSpecTest {
             assertThat(batch.countAll()).isEqualTo(0);
 
             for (int i = 1; i < batch.bachSize(); i++) {
-                batch.insertAndReturnVoid("a", i);
+                batch.insertAndReturnVoid("a", i, SimpleExample.PricingPlan.FREE);
             }
             assertThat(service.customers("a")).hasSize(0);
-            batch.insertAndReturnVoid("a", 0);
+            batch.insertAndReturnVoid("a", 0, SimpleExample.PricingPlan.FREE);
             assertThat(service.customers("a")).hasSize(batch.bachSize());
         }
     }
@@ -149,10 +150,10 @@ class UpdateBatchSpecTest {
             assertThat(batch.countAll()).isEqualTo(0);
 
             for (int i = 1; i < batch.bachSize(); i++) {
-                batch.insertAndReturnVoid("a", i);
+                batch.insertAndReturnVoid("a", i, SimpleExample.PricingPlan.FREE);
             }
             assertThat(service.customers("a")).hasSize(0);
-            batch.insertAndReturnVoid("a", 0);
+            batch.insertAndReturnVoid("a", 0, SimpleExample.PricingPlan.FREE);
             assertThat(service.customers("a")).hasSize(batch.bachSize());
         }
     }

@@ -9,6 +9,7 @@ import io.kaumei.jdbc.annotation.JdbcSelect;
 import io.kaumei.jdbc.annotation.JdbcUpdate;
 import io.kaumei.jdbc.annotation.config.JdbcQueryTimeout;
 import io.kaumei.jdbc.annotation.config.JdbcReturnGeneratedValues;
+import io.kaumei.jdbc.docs.SimpleExample;
 import io.kaumei.jdbc.spec.db.DbCustomer;
 
 import java.time.LocalDateTime;
@@ -21,7 +22,7 @@ public interface StatementInterfaceSpec {
     record DbCustomerId(long id) {
     }
 
-    @JdbcUpdate("INSERT INTO db_customers (name, created) values (:name, :created)")
+    @JdbcUpdate("INSERT INTO db_customers (name,pricing_plan,created_at) values (:name,:plan,:created)")
     @JdbcReturnGeneratedValues()
-    DbCustomerId insert(String name, LocalDateTime created);
+    DbCustomerId insert(String name, SimpleExample.PricingPlan plan, LocalDateTime created);
 }

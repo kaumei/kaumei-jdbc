@@ -8,11 +8,13 @@ package io.kaumei.jdbc.anno.jdbc2java;
 import com.palantir.javapoet.CodeBlock;
 import io.kaumei.jdbc.anno.OptionalFlag;
 import io.kaumei.jdbc.anno.gen.KaumeiMethodBodyBuilder;
+import io.kaumei.jdbc.anno.store.Converter;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.type.TypeMirror;
+import java.util.Objects;
 import java.util.Optional;
 
 class ConverterColumnResultSet extends Jdbc2JavaConverter {
@@ -24,6 +26,14 @@ class ConverterColumnResultSet extends Jdbc2JavaConverter {
         super(type);
         this.typeElement = method.getEnclosingElement();
         this.methodName = method.getSimpleName();
+    }
+
+    @Override
+    public boolean isSame(Converter o) {
+        return o instanceof ConverterColumnResultSet c
+                && Objects.equals(type, c.type)
+                && Objects.equals(typeElement, c.typeElement)
+                && Objects.equals(methodName, c.methodName);
     }
 
     // ------------------------------------------------------------------------

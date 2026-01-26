@@ -8,10 +8,12 @@ package io.kaumei.jdbc.anno.jdbc2java;
 import com.palantir.javapoet.CodeBlock;
 import io.kaumei.jdbc.anno.OptionalFlag;
 import io.kaumei.jdbc.anno.gen.KaumeiMethodBodyBuilder;
+import io.kaumei.jdbc.anno.store.Converter;
 import org.jspecify.annotations.Nullable;
 
 import javax.lang.model.type.TypeMirror;
 import java.sql.ResultSet;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
@@ -27,6 +29,15 @@ class ConverterColumnNative extends Jdbc2JavaConverter {
         this.cls = cls == ResultSet.class ? null : cls;
         this.methodName = requireNonNull(methodName);
         this.isPrimitive = this.type().getKind().isPrimitive();
+    }
+
+    @Override
+    public boolean isSame(Converter o) {
+        return o instanceof ConverterColumnNative c
+                && Objects.equals(type, c.type)
+                && Objects.equals(cls, c.cls)
+                && isPrimitive == c.isPrimitive
+                && Objects.equals(methodName, c.methodName);
     }
 
     // ------------------------------------------------------------------------

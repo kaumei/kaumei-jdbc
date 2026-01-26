@@ -10,6 +10,7 @@ import io.kaumei.jdbc.anno.OptionalFlag;
 import io.kaumei.jdbc.anno.ProcessorException;
 import io.kaumei.jdbc.anno.gen.KaumeiLib;
 import io.kaumei.jdbc.anno.gen.KaumeiMethodBodyBuilder;
+import io.kaumei.jdbc.anno.store.Converter;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Objects;
@@ -22,6 +23,14 @@ class ConverterStaticStatement extends Java2JdbcConverter {
         super(type);
         this.qualifiedTypeName = Objects.requireNonNull(qualifiedTypeName);
         this.methodName = Objects.requireNonNull(methodName);
+    }
+
+    @Override
+    public boolean isSame(Converter o) {
+        return o instanceof ConverterStaticStatement c
+                && Objects.equals(type, c.type)
+                && Objects.equals(qualifiedTypeName, c.qualifiedTypeName)
+                && Objects.equals(methodName, c.methodName);
     }
 
     @Override

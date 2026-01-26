@@ -24,6 +24,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -46,12 +47,15 @@ public final class JavaAnnoTypes {
     final TypeMirror JAVA_SQL_SQLException;
     final TypeMirror JAVA_Stream;
     public final TypeMirror JAVA_String;
-    final TypeMirror JSPECIFY_NonNull;
-    final TypeMirror JSPECIFY_NullMarked;
-    final TypeMirror JSPECIFY_Nullable;
-    final TypeMirror KAUMEI_JDBC_JdbcBatch;
-    final TypeMirror KAUMEI_JDBC_JdbcIterable;
-    final TypeMirror KAUMEI_JDBC_JdbcResultSet;
+    /*
+    private final @Nullable TypeMirror JSPECIFY_NonNull;
+    private final @Nullable TypeMirror JSPECIFY_NullMarked;
+    private final @Nullable TypeMirror JSPECIFY_Nullable;
+    */
+    private final BiFunction<Element, TypeMirror, OptionalFlag> jspecifyCheck;
+    private final TypeMirror KAUMEI_JDBC_JdbcBatch;
+    private final TypeMirror KAUMEI_JDBC_JdbcIterable;
+    private final TypeMirror KAUMEI_JDBC_JdbcResultSet;
 
     public JavaAnnoTypes(Types types, Elements elements) {
         this.types = types;
@@ -66,13 +70,31 @@ public final class JavaAnnoTypes {
         this.JAVA_SQL_SQLException = requireNonNull(this.typeMirror(SQLException.class));
         this.JAVA_Stream = requireNonNull(this.erasure(this.typeMirror(Stream.class)));
         this.JAVA_String = requireNonNull(this.typeMirror(String.class));
-        this.JSPECIFY_NonNull = requireNonNull(this.typeMirror(NonNull.class));
-        this.JSPECIFY_NullMarked = requireNonNull(this.typeMirror(NullMarked.class));
-        this.JSPECIFY_Nullable = requireNonNull(this.typeMirror(Nullable.class));
-        this.KAUMEI_JDBC_JdbcBatch = requireNonNull(this.typeMirror(JdbcBatch.class));
-        this.KAUMEI_JDBC_JdbcIterable = requireNonNull(this.erasure(this.typeMirror(JdbcIterable.class)));
-        this.KAUMEI_JDBC_JdbcResultSet = requireNonNull(this.erasure(this.typeMirror(JdbcResultSet.class)));
+        this.jspecifyCheck = JspecifyChecker.of(types, elements);
+
+        var JdbcBatch = typeMirrorOpt(types, elements, JdbcBatch.class);
+        var JdbcIterable = typeMirrorOpt(types, elements, JdbcIterable.class);
+        var JdbcResultSet = typeMirrorOpt(types, elements, JdbcResultSet.class);
+        if (JdbcBatch == null || JdbcIterable == null || JdbcResultSet == null) {
+            throw new ProcessorException("""
+                    Could not find Kaumei-JDBC lib on the classpath.
+                    Add the following dependency io.kaumei.jdbc:jdbc-annotation and io.kaumei.jdbc:jdbc-core
+                    to your classpath or disable the io.kaumei.jdbc:jdbc-processor annotation processor.
+                    """);
+        }
+        this.KAUMEI_JDBC_JdbcBatch = JdbcBatch;
+        this.KAUMEI_JDBC_JdbcIterable = JdbcIterable;
+        this.KAUMEI_JDBC_JdbcResultSet = JdbcResultSet;
     }
+
+    static @Nullable TypeMirror typeMirrorOpt(Types types, Elements elements, Class<?> cls) {
+        try {
+            return types.erasure(elements.getTypeElement(cls.getCanonicalName()).asType());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 
     // ------------------------------------------------------------------------
 
@@ -106,7 +128,7 @@ public final class JavaAnnoTypes {
      */
     public boolean isSubtype(TypeMirror type, List<? extends TypeMirror> list) {
         for (TypeMirror methodThrows : list) {
-            if(this.types.isSubtype(type, methodThrows)) {
+            if (this.types.isSubtype(type, methodThrows)) {
                 return true;
             }
         }
@@ -138,7 +160,7 @@ public final class JavaAnnoTypes {
      */
     public boolean isSubtype(TypeMirror type, TypeMirror... list) {
         for (TypeMirror methodThrows : list) {
-            if(this.types.isSubtype(type, methodThrows)) {
+            if (this.types.isSubtype(type, methodThrows)) {
                 return true;
             }
         }
@@ -147,7 +169,7 @@ public final class JavaAnnoTypes {
 
     public String getFqn(TypeMirror mirror) {
         TypeMirror erased = this.types.erasure(mirror);
-        if(erased.getKind() == TypeKind.DECLARED) {
+        if (erased.getKind() == TypeKind.DECLARED) {
             TypeElement te = (TypeElement) ((DeclaredType) erased).asElement();
             return te.getQualifiedName().toString();
         }
@@ -170,32 +192,32 @@ public final class JavaAnnoTypes {
     }
 
     public AnalyseResult analyseTypeMirror(TypeMirror type) {
-        if(type.getKind() == TypeKind.VOID) {
+        if (type.getKind() == TypeKind.VOID) {
             return new AnalyseResult(JdbcTypeKind.VOID, type, null);
-        } else if(type.getKind().isPrimitive()) {
+        } else if (type.getKind().isPrimitive()) {
             return new AnalyseResult(JdbcTypeKind.PRIMITIVE, type, null);
-        } else if(this.isKaumeiJdbcBatch(type)) {
+        } else if (this.isKaumeiJdbcBatch(type)) {
             return new AnalyseResult(JdbcTypeKind.KAUMEI_JDBC_BATCH, type, null);
-        } else if(this.isOptionalType(type) && type instanceof DeclaredType declared) {
+        } else if (this.isOptionalType(type) && type instanceof DeclaredType declared) {
             var type0 = this.erasure(type);
             var component = declared.getTypeArguments().getFirst();
             return new AnalyseResult(JdbcTypeKind.OPTIONAL_TYPE, type0, component);
-        } else if(type instanceof DeclaredType declared) {
+        } else if (type instanceof DeclaredType declared) {
             var type0 = this.erasure(type);
-            if(this.isSameType(type0, this.JAVA_List)) {
+            if (this.isSameType(type0, this.JAVA_List)) {
                 var component = declared.getTypeArguments().getFirst();
                 return new AnalyseResult(JdbcTypeKind.LIST, type0, component);
-            } else if(this.isSameType(type0, this.JAVA_Stream)) {
+            } else if (this.isSameType(type0, this.JAVA_Stream)) {
                 var component = declared.getTypeArguments().getFirst();
                 return new AnalyseResult(JdbcTypeKind.STREAM, type0, component);
-            } else if(this.isSameType(type0, this.KAUMEI_JDBC_JdbcIterable)) {
+            } else if (this.isSameType(type0, this.KAUMEI_JDBC_JdbcIterable)) {
                 var component = declared.getTypeArguments().getFirst();
                 return new AnalyseResult(JdbcTypeKind.KAUMEI_JDBC_ITERABLE, type0, component);
-            } else if(this.isSameType(type0, this.KAUMEI_JDBC_JdbcResultSet)) {
+            } else if (this.isSameType(type0, this.KAUMEI_JDBC_JdbcResultSet)) {
                 var component = declared.getTypeArguments().getFirst();
                 return new AnalyseResult(JdbcTypeKind.KAUMEI_JDBC_RESULT_SET, type0, component);
             }
-        } else if(type instanceof ArrayType arrayType && arrayType.getComponentType().getKind() != TypeKind.ARRAY) {
+        } else if (type instanceof ArrayType arrayType && arrayType.getComponentType().getKind() != TypeKind.ARRAY) {
             var type0 = this.erasure(type);
             var component = arrayType.getComponentType();
             return new AnalyseResult(JdbcTypeKind.ARRAY, type0, component);
@@ -225,12 +247,12 @@ public final class JavaAnnoTypes {
             TypeMirror current = start;
             while (current != null && current.getKind() != TypeKind.NONE) {
                 T result = search.apply(current);
-                if(result != null) {
+                if (result != null) {
                     return result;
                 }
                 clsList.add(current);
                 visited.add(current);
-                if(this.types.asElement(current) instanceof TypeElement typeElement) {
+                if (this.types.asElement(current) instanceof TypeElement typeElement) {
                     current = typeElement.getSuperclass();
                 } else {
                     throw new ProcessorException("Unexpected type: " + current); // sanity-check
@@ -240,7 +262,7 @@ public final class JavaAnnoTypes {
             // 2. process all interfaces
             for (var cls : clsList) {
                 T result = visitInterfaces(cls);
-                if(result != null) {
+                if (result != null) {
                     return result;
                 }
             }
@@ -248,15 +270,15 @@ public final class JavaAnnoTypes {
         }
 
         private @Nullable T visitInterfaces(TypeMirror type) {
-            if(this.types.asElement(type) instanceof TypeElement element) {
+            if (this.types.asElement(type) instanceof TypeElement element) {
                 for (var iface : element.getInterfaces()) {
-                    if(visited.add(iface)) {
+                    if (visited.add(iface)) {
                         T result = search.apply(iface);
-                        if(result != null) {
+                        if (result != null) {
                             return result;
                         }
                         result = visitInterfaces(iface);
-                        if(result != null) {
+                        if (result != null) {
                             return result;
                         }
                     }
@@ -277,58 +299,87 @@ public final class JavaAnnoTypes {
      * @return result of the check, not null
      */
     public OptionalFlag optionalFlag(Element context, TypeMirror type) {
-        if(type.getKind().isPrimitive()) {
+        if (type.getKind().isPrimitive()) {
             return OptionalFlag.NON_NULL;
-        } else if(this.types.isSameType(this.types.erasure(type), this.JAVA_Optional)) {
+        } else if (this.types.isSameType(this.types.erasure(type), this.JAVA_Optional)) {
             return OptionalFlag.OPTIONAL_TYPE;
         }
-        return isOptionalJspecify(context, type);
+        return jspecifyCheck.apply(context, type);
     }
 
-    /**
-     * Primitives → MANDATORY
-     * - Optional<T> → OPTIONAL_TYPE
-     * - @Nullable on element → OPTIONAL
-     * - @NonNull on element → MANDATORY
-     * - In @NullMarked scope → unannotated types are MANDATORY
-     * - In @NullUnmarked scope → unannotated types are UNSPECIFIED
-     * - No markers found → UNSPECIFIED
-     */
-    private OptionalFlag isOptionalJspecify(Element context, TypeMirror type) {
-        boolean nullable = false;
-        boolean nonnull = false;
 
-        // Check for @Nullable or @Nonnull annotation on the element (e.g., method, parameter, field)
-        for (var annotation : type.getAnnotationMirrors()) {
-            var annoType = annotation.getAnnotationType();
-            if(!nullable && this.types.isSameType(annoType, JSPECIFY_Nullable)) {
-                nullable = true;
-            } else if(!nonnull && this.types.isSameType(annoType, JSPECIFY_NonNull)) {
-                nonnull = true;
+    // ----------------------------------------------------------------
+
+    static class JspecifyChecker implements BiFunction<Element, TypeMirror, OptionalFlag> {
+
+        static BiFunction<Element, TypeMirror, OptionalFlag> of(Types types, Elements elements) {
+            var nonNull = typeMirrorOpt(types,elements,NonNull.class);
+            var nullMarked = typeMirrorOpt(types,elements,NullMarked.class);
+            var nullable = typeMirrorOpt(types,elements,Nullable.class);
+            if (nonNull != null && nullMarked != null && nullable != null) {
+                return new JspecifyChecker(types, nonNull, nullMarked, nullable);
             }
+            return (_a, _b) -> OptionalFlag.UNSPECIFIED;
         }
 
-        Element current = context;
-        while (current != null && !nullable && !nonnull) {
-            // Check for @Nullable or @Nonnull annotation on the enclosing elements (bottom up)
-            // stop if we found nullable or nonnull
-            for (var annotation : current.getAnnotationMirrors()) {
+        private final Types types;
+        private final TypeMirror nonNull;
+        private final TypeMirror nullMarked;
+        private final TypeMirror nullable;
+
+        private JspecifyChecker(Types types, TypeMirror nonNull, TypeMirror nullMarked, TypeMirror nullable) {
+            this.types = types;
+            this.nonNull = requireNonNull(nonNull);
+            this.nullMarked = requireNonNull(nullMarked);
+            this.nullable = requireNonNull(nullable);
+        }
+
+        /**
+         * Primitives → MANDATORY
+         * - Optional<T> → OPTIONAL_TYPE
+         * - @Nullable on element → OPTIONAL
+         * - @NonNull on element → MANDATORY
+         * - In @NullMarked scope → unannotated types are MANDATORY
+         * - In @NullUnmarked scope → unannotated types are UNSPECIFIED
+         * - No markers found → UNSPECIFIED
+         */
+        @Override
+        public OptionalFlag apply(Element context, TypeMirror type) {
+            boolean nullable = false;
+            boolean nonnull = false;
+
+            // Check for @Nullable or @Nonnull annotation on the element (e.g., method, parameter, field)
+            for (var annotation : type.getAnnotationMirrors()) {
                 var annoType = annotation.getAnnotationType();
-                if(!nullable && this.types.isSameType(annoType, JSPECIFY_NullMarked)) {
-                    nonnull = true;
-                } else if(!nonnull && this.types.isSameType(annoType, JSPECIFY_NullMarked)) {
+                if (!nullable && this.types.isSameType(annoType, this.nullable)) {
                     nullable = true;
+                } else if (!nonnull && this.types.isSameType(annoType, nonNull)) {
+                    nonnull = true;
                 }
             }
-            current = current.getEnclosingElement();
-        }
 
-        if(nonnull && !nullable) {
-            return OptionalFlag.NON_NULL;
-        } else if(!nonnull && nullable) {
-            return OptionalFlag.NULLABLE;
+            Element current = context;
+            while (current != null && !nullable && !nonnull) {
+                // Check for @Nullable or @Nonnull annotation on the enclosing elements (bottom up)
+                // stop if we found nullable or nonnull
+                for (var annotation : current.getAnnotationMirrors()) {
+                    var annoType = annotation.getAnnotationType();
+                    if (!nullable && this.types.isSameType(annoType, this.nullMarked)) {
+                        nonnull = true;
+                    } else if (!nonnull && this.types.isSameType(annoType, this.nullMarked)) {
+                        nullable = true;
+                    }
+                }
+                current = current.getEnclosingElement();
+            }
+
+            if (nonnull && !nullable) {
+                return OptionalFlag.NON_NULL;
+            } else if (!nonnull && nullable) {
+                return OptionalFlag.NULLABLE;
+            }
+            return OptionalFlag.UNSPECIFIED;
         }
-        return OptionalFlag.UNSPECIFIED;
     }
 
 }

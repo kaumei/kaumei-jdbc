@@ -118,7 +118,6 @@
                     </annotationProcessorPaths>
                     <compilerArgs>
                         <!-- @part:compiler -->
-                        <arg>${jacoco.compiler}</arg>
                         <arg>-Aio.kaumei.jdbc.processor.debugfolder=${project.basedir}/my_debug</arg>
                         <!-- @part:compiler -->
                         <arg>-Aio.kaumei.jdbc.processor.config=io.kaumei.jdbc.spec.ConfigSpec</arg>

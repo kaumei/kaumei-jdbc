@@ -11,6 +11,7 @@ import io.kaumei.jdbc.anno.ProcessorException;
 import io.kaumei.jdbc.anno.gen.KaumeiLib;
 import io.kaumei.jdbc.anno.gen.KaumeiMethodBodyBuilder;
 import io.kaumei.jdbc.anno.msg.Msg;
+import io.kaumei.jdbc.anno.store.Converter;
 import io.kaumei.jdbc.anno.store.SearchKey;
 
 import javax.lang.model.element.Name;
@@ -25,6 +26,14 @@ class ConverterObjectSimple extends Java2JdbcConverter {
         super(type);
         this.searchKey = Objects.requireNonNull(searchKey);
         this.methodName = Objects.requireNonNull(methodName);
+    }
+
+    @Override
+    public boolean isSame(Converter o) {
+        return o instanceof ConverterObjectSimple c
+                && Objects.equals(type, c.type)
+                && Objects.equals(searchKey, c.searchKey)
+                && Objects.equals(methodName, c.methodName);
     }
 
     @Override

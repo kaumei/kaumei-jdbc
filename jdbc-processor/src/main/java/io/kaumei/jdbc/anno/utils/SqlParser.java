@@ -8,6 +8,7 @@ package io.kaumei.jdbc.anno.utils;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static java.util.Objects.requireNonNull;
 
@@ -18,8 +19,13 @@ public class SqlParser {
     public record Result(String nativeSql,
                          IntString[] index2name,
                          String originalSql) {
-
-
+        @Override
+        public String toString() {
+            return "Result["
+                    + "originalSql=" + originalSql
+                    + ", index2name=" + Arrays.toString(index2name)
+                    + ", nativeSql=" + nativeSql + ']';
+        }
     }
 
     public static Result parse(String sql) {

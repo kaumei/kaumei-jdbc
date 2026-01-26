@@ -10,6 +10,7 @@ import io.kaumei.jdbc.annotation.JdbcSelect;
 import io.kaumei.jdbc.annotation.JdbcToJava;
 import io.kaumei.jdbc.annotation.JdbcUpdate;
 import io.kaumei.jdbc.annotation.config.JdbcReturnGeneratedValues;
+import io.kaumei.jdbc.docs.SimpleExample;
 import io.kaumei.jdbc.spec.db.DbCustomer;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -35,8 +36,8 @@ public interface UpdateSpec {
     @JdbcUpdate("SELECT 1")
     double invalidReturnType();
 
-    @JdbcUpdate("INSERT INTO db_customers (name,budge) values (:name,:budge)")
-    void insertAndReturnVoid(String name, Integer budge);
+    @JdbcUpdate("INSERT INTO db_customers (name,budge,pricing_plan) values (:name,:budge,:plan)")
+    void insertAndReturnVoid(String name, Integer budge, SimpleExample.PricingPlan plan);
 
     @JdbcUpdate("UPDATE db_customers SET budge = :budge WHERE name = :name")
     int updateAndReturnInt(String name, Integer budge);
@@ -47,12 +48,12 @@ public interface UpdateSpec {
     // ------------------------------------------------------------
 
     @JdbcReturnGeneratedValues(JdbcReturnGeneratedValues.Kind.GENERATED_KEYS)
-    @JdbcUpdate("INSERT INTO db_customers (name,budge) values (:name,:budge)")
-    Long updateGeneratedKeysUnspecific(String name, Integer budge);
+    @JdbcUpdate("INSERT INTO db_customers (name,budge,pricing_plan) values (:name,:budge,:plan)")
+    Long updateGeneratedKeysUnspecific(String name, Integer budge, SimpleExample.PricingPlan plan);
 
     @JdbcReturnGeneratedValues(JdbcReturnGeneratedValues.Kind.GENERATED_KEYS)
-    @JdbcUpdate("INSERT INTO db_customers (name,budge) values (:name,:budge)")
-    @NonNull Long returnTypeForGeneratedKeysNonNull(String name, Integer budge);
+    @JdbcUpdate("INSERT INTO db_customers (name,budge,pricing_plan) values (:name,:budge,:plan)")
+    @NonNull Long returnTypeForGeneratedKeysNonNull(String name, Integer budge, SimpleExample.PricingPlan plan);
 
     @JdbcReturnGeneratedValues(JdbcReturnGeneratedValues.Kind.GENERATED_KEYS)
     @JdbcUpdate("SELECT 1")

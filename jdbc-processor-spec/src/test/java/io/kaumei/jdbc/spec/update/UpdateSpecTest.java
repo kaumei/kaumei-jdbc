@@ -8,6 +8,7 @@ package io.kaumei.jdbc.spec.update;
 import io.kaumei.jdbc.DatasourceExtension;
 import io.kaumei.jdbc.JdbcTestOnH2Database;
 import io.kaumei.jdbc.JdbcTestOnPostgreSql;
+import io.kaumei.jdbc.docs.SimpleExample;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -47,7 +48,7 @@ class UpdateSpecTest {
         // given
         var name = "Foobar";
         // when
-        service.insertAndReturnVoid(name, 1000);
+        service.insertAndReturnVoid(name, 1000, SimpleExample.PricingPlan.FREE);
         // then
         var customer = service.customers(name);
         assertThat(customer.name()).isEqualTo(name);
@@ -58,7 +59,7 @@ class UpdateSpecTest {
     void updateAndReturnInt() {
         // given
         var name = "Foobar";
-        service.insertAndReturnVoid(name, 1000);
+        service.insertAndReturnVoid(name, 1000, SimpleExample.PricingPlan.FREE);
         // when ... then
         assertThat(service.updateAndReturnInt(name, 42)).isEqualTo(1);
         assertThat(service.customers(name).budge()).isEqualTo(42);
@@ -70,7 +71,7 @@ class UpdateSpecTest {
     void updateAndReturnBoolean() {
         // given
         var name = "Foobar";
-        service.insertAndReturnVoid(name, 1000);
+        service.insertAndReturnVoid(name, 1000, SimpleExample.PricingPlan.FREE);
         // when ... then
         assertThat(service.updateAndReturnBoolean(name, 42)).isTrue();
         assertThat(service.customers(name).budge()).isEqualTo(42);
@@ -94,7 +95,7 @@ class UpdateSpecTest {
         // given
         var name = "Foobar";
         // when ... then
-        var id = service.updateGeneratedKeysUnspecific(name, 42);
+        var id = service.updateGeneratedKeysUnspecific(name, 42, SimpleExample.PricingPlan.FREE);
         var customer = service.customers(name);
         assertThat(customer.id()).isEqualTo(id);
     }
@@ -115,7 +116,7 @@ class UpdateSpecTest {
         // given
         var name = "Foobar";
         // when ... then
-        var id = service.returnTypeForGeneratedKeysNonNull(name, 42);
+        var id = service.returnTypeForGeneratedKeysNonNull(name, 42, SimpleExample.PricingPlan.FREE);
         var customer = service.customers(name);
         assertThat(customer.id()).isEqualTo(id);
     }
@@ -125,13 +126,13 @@ class UpdateSpecTest {
     @Test
     void invalidReturnTypeForGeneratedKeysNullable() {
         kaumeiThrows(() -> service.invalidReturnTypeForGeneratedKeysNullable())
-                .returnNullnessNotSupported("nullable","non-null","unspecific");
+                .returnNullnessNotSupported("nullable", "non-null", "unspecific");
     }
 
     @Test
     void invalidReturnTypeForGeneratedKeysOptional() {
         kaumeiThrows(() -> service.invalidReturnTypeForGeneratedKeysOptional())
-                .returnNullnessNotSupported("Optional<.>","non-null","unspecific");
+                .returnNullnessNotSupported("Optional<.>", "non-null", "unspecific");
     }
 
     @Test

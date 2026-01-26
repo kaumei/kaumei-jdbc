@@ -44,7 +44,7 @@ export default defineConfig({
 					label: 'Introduction',
 					collapsed: true,
 					items: [
-						'intro/intro',
+						'intro/introduction',
 						'intro/why-kaumei',
 						'intro/installation',
 						'intro/example'

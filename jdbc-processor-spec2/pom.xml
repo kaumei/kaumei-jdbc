@@ -90,7 +90,6 @@
                         </path>
                     </annotationProcessorPaths>
                     <compilerArgs>
-                        <arg>${jacoco.compiler}</arg>
                         <arg>-Aio.kaumei.jdbc.processor.loglevel=INFO</arg>
                     </compilerArgs>
                 </configuration>

@@ -25,14 +25,17 @@ public class JavaAnnoMessenger {
 
     // ----- service
     private final Messager messager;
-    private final JavaAnnoElements elements;
+    private @Nullable JavaAnnoElements elements;
 
     // ----- state
     private JdbcLogLevel.LogLevel logState = JdbcLogLevel.LogLevel.ERROR;
 
-    JavaAnnoMessenger(ProcessingEnvironment env, JavaAnnoElements elements) {
+    JavaAnnoMessenger(ProcessingEnvironment env) {
         this.messager = env.getMessager();
         this.logState = getLogLevel(env.getOptions());
+    }
+
+    void updateElements(JavaAnnoElements elements) {
         this.elements = elements;
     }
 
@@ -234,7 +237,11 @@ public class JavaAnnoMessenger {
             }
             sb.append(']');
         } else if (value instanceof Element e) {
-            this.elements.addQualifiedName(sb, e, true);
+            if (this.elements != null) {
+                this.elements.addQualifiedName(sb, e, true);
+            } else {
+                sb.append(e.getSimpleName());
+            }
         } else {
             sb.append(value);
         }

@@ -7,6 +7,7 @@ package io.kaumei.jdbc.spec2.config;
 
 import io.kaumei.jdbc.DatasourceExtension;
 import io.kaumei.jdbc.KaumeiAssert;
+import io.kaumei.jdbc.docs.SimpleExample;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -59,7 +60,7 @@ class StatementInvalidSpecTest {
 
     @Test
     void insert() {
-        assertThat(service.insert(NAME)).isEqualTo(1);
+        assertThat(service.insert(NAME, SimpleExample.PricingPlan.FREE)).isEqualTo(1);
         assertSource(service.getClass())
                 .hasClass(service.getClass().getSimpleName())
                 .hasMethod("insert")
@@ -69,7 +70,7 @@ class StatementInvalidSpecTest {
     @Test
     void batch() {
         try (var batch = service.batch()) {
-            batch.insert(NAME);
+            batch.insert(NAME, SimpleExample.PricingPlan.FREE);
             assertSource(service.getClass())
                     .hasClass(service.getClass().getSimpleName())
                     .hasMethod("batch")

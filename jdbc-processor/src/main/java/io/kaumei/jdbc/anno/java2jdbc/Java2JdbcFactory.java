@@ -141,11 +141,11 @@ class Java2JdbcFactory {
     // ------------------------------------------------------------------------
 
     private Java2JdbcConverter converterStaticSimple(MsgSetBuilder messages, ExecutableElement method) {
-        // jacoco:off
+        // sanity-check:on
         if (method.getParameters().size() != 1) {
             throw new ProcessorException("Invalid parameter count: " + method.getParameters().size());
         }
-        // jacoco:on
+        // sanity-check:off
 
         // ----- check return type
         var returnType = method.getReturnType();
@@ -173,11 +173,11 @@ class Java2JdbcFactory {
     // ------------------------------------------------------------------------
 
     private Java2JdbcConverter converterStaticStatement(MsgSetBuilder messages, ExecutableElement method) {
-        // jacoco:off
+        // sanity-check:on
         if (method.getParameters().size() != 3) {
             throw new ProcessorException("Invalid parameter count: " + method.getParameters().size());
         }
-        // jacoco:on
+        // sanity-check:off
 
         // ----- check return type
         var returnType = method.getReturnType();

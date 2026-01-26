@@ -43,14 +43,12 @@
         <version.postgresql>42.7.8</version.postgresql>
         <version.junit>6.0.1</version.junit>
         <version.mockito>5.21.0</version.mockito>
-        <version.jacoco>0.8.14</version.jacoco>
         <version.assertj>4.0.0-M1</version.assertj>
     </properties>
     <modules>
         <module>jdbc-annotation</module>
         <module>jdbc-core</module>
-        <module>jdbc-integration</module>
-        <module>jdbc-jacoco</module>
+        <module>jdbc-integration-spring</module>
         <module>jdbc-processor</module>
         <module>jdbc-processor-spec</module>
         <module>jdbc-processor-spec2</module>
@@ -58,36 +56,6 @@
     </modules>
 
     <profiles>
-        <!-- jacoco -->
-        <profile>
-            <id>jacoco</id>
-            <properties>
-                <version.jacoco>0.8.14</version.jacoco>
-                <jacoco.javaagent>0.8.14</jacoco.javaagent>
-                <jacoco.jar>${settings.localRepository}/org/jacoco/org.jacoco.agent/${version.jacoco}/org.jacoco.agent-${version.jacoco}-runtime.jar</jacoco.jar>
-                <jacoco.compiler>-J-javaagent:${jacoco.jar}=destfile=${project.build.directory}/jacoco.exec
-                </jacoco.compiler>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.14.1</version>
-                        <configuration>
-                            <fork>true</fork>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <argLine> -javaagent:${jacoco.jar}=destfile=${project.build.directory}/jacoco-test.exec
-                            </argLine>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
         <!-- publish -->
         <profile>
             <id>publish</id>
@@ -158,9 +126,10 @@
                         <configuration>
                             <publishingServerId>central</publishingServerId>
                             <excludeArtifacts>
-                                <artifact>jdbc-jacoco</artifact>
-                                <artifact>jdbc-integration</artifact>
+                                <artifact>jdbc-integration-spring</artifact>
                                 <artifact>jdbc-processor-spec</artifact>
+                                <artifact>jdbc-processor-spec2</artifact>
+                                <artifact>jdbc-processor-spec3</artifact>
                             </excludeArtifacts>
                         </configuration>
                     </plugin>

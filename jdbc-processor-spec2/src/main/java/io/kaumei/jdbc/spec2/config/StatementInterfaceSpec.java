@@ -10,6 +10,7 @@ import io.kaumei.jdbc.annotation.JdbcSelect;
 import io.kaumei.jdbc.annotation.JdbcUpdate;
 import io.kaumei.jdbc.annotation.JdbcUpdateBatch;
 import io.kaumei.jdbc.annotation.config.JdbcQueryTimeout;
+import io.kaumei.jdbc.docs.SimpleExample;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -28,15 +29,15 @@ public interface StatementInterfaceSpec {
     @JdbcSelect("SELECT id FROM db_customers WHERE name = :name")
     Stream<Integer> selectStream(String name);
 
-    @JdbcUpdate("INSERT INTO db_customers (name) values (:name)")
-    int insert(String name);
+    @JdbcUpdate("INSERT INTO db_customers (name,pricing_plan) values (:name,:plan)")
+    int insert(String name, SimpleExample.PricingPlan plan);
 
     @JdbcUpdateBatch()
     Batch batch();
 
     interface Batch extends JdbcBatch {
-        @JdbcUpdate("INSERT INTO db_customers (name) values (:name)")
-        void insert(String name);
+        @JdbcUpdate("INSERT INTO db_customers (name,pricing_plan) values (:name,:plan)")
+        void insert(String name, SimpleExample.PricingPlan plan);
     }
 
     // util methods ###########################################################

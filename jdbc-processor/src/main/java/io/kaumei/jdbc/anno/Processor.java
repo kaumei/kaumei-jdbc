@@ -85,19 +85,7 @@ public final class Processor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment env) {
         super.init(env);
-        var startTime = System.currentTimeMillis();
-
-        var types = new JavaAnnoTypes(env.getTypeUtils(), env.getElementUtils());
-        var elements = new JavaAnnoElements(types, env);
-        this.logger = new JavaAnnoMessenger(env, elements);
-        var filer = new JavaAnnoFiler(this.logger, env.getFiler());
-
-        this.jdbcConfigService = new ConfigService(this.logger, elements, env.getOptions());
-        this.jdbc2JavaService = new Jdbc2JavaService(this.logger, types, elements);
-        this.java2JdbcService = new Java2JdbcService(this.logger, types, elements);
-        this.jdbcGeneratorService = new GenerateService(this.logger, types, elements, filer,
-                this.jdbcConfigService, this.jdbc2JavaService, this.java2JdbcService);
-        this.timeInMillis += (System.currentTimeMillis() - startTime);
+        this.logger = new JavaAnnoMessenger(env);
     }
 
     @Override
@@ -113,25 +101,40 @@ public final class Processor extends AbstractProcessor {
     }
 
     private boolean process0(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        if(roundEnv.processingOver()) {
+        if (this.logger == null) {
+            throw new ProcessorException("Illegal state: logger is null");
+        } else if (roundEnv.processingOver()) {
             this.logger.allways("Processing is over. Skip JDBC annotation processing.");
             return false;
-        } else if(roundEnv.errorRaised()) {
+        } else if (roundEnv.errorRaised()) {
             this.logger.allways("Processing raised error. Skip JDBC annotation processing.");
             return false;
-        } else if(roundEnv.getRootElements() == null || roundEnv.getRootElements().isEmpty()) {
+        } else if (roundEnv.getRootElements() == null || roundEnv.getRootElements().isEmpty()) {
             this.logger.allways("No root elements found. Skip JDBC annotation processing.");
             return false;
-        } else if(annotations.isEmpty()) {
+        } else if (annotations.isEmpty()) {
             this.logger.allways("No annotations found. Skip JDBC annotation processing.");
             return false;
-        } else if(finished) {
+        } else if (finished) {
             this.logger.allways("Already finished. Skip this round.");
             return false;
         }
         this.logger.debug("Start Kaumei JDBC annotation processing");
 
         var startTime = System.currentTimeMillis();
+
+        var types = new JavaAnnoTypes( this.processingEnv.getTypeUtils(), this.processingEnv.getElementUtils());
+        var elements = new JavaAnnoElements(types, this.processingEnv);
+        this.logger.updateElements(elements);
+        var filer = new JavaAnnoFiler(this.logger, this.processingEnv.getFiler());
+
+        this.jdbcConfigService = new ConfigService(this.logger, elements, this.processingEnv.getOptions());
+        this.jdbc2JavaService = new Jdbc2JavaService(this.logger, types, elements);
+        this.java2JdbcService = new Java2JdbcService(this.logger, types, elements);
+        this.jdbcGeneratorService = new GenerateService(this.logger, types, elements, filer,
+                this.jdbcConfigService, this.jdbc2JavaService, this.java2JdbcService);
+
+
         var jdbcRoundEnv = new ProcessorEnvironment(this.logger, this.jdbcConfigService,
                 annotations, roundEnv);
         String dumpState = "ok";
@@ -152,12 +155,12 @@ public final class Processor extends AbstractProcessor {
     }
 
     private void dumpState(ProcessorEnvironment jdbcRoundEnv, String state) {
-        if(!jdbcConfigService.dump()) {
+        if (!jdbcConfigService.dump()) {
             return;
         }
         var folder = jdbcConfigService.dumpFolder();
         try {
-            if(!Files.exists(folder)) {
+            if (!Files.exists(folder)) {
                 Files.createDirectories(folder);
             }
             var runId = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
@@ -169,14 +172,14 @@ public final class Processor extends AbstractProcessor {
             var dataString = sb.toString();
             var currentHash = sha256Short(dataString); // use a hash, so we can check if there are changes
             var lastDataFile = search(folder);
-            if(!lastDataFile.contains(currentHash)) {
+            if (!lastDataFile.contains(currentHash)) {
                 var data = folder.resolve("data-" + runId + "-" + currentHash + ".txt");
                 Files.writeString(data, dataString, StandardOpenOption.CREATE_NEW);
             }
 
             // ------ add run stats
             var runPath = folder.resolve("./run.csv");
-            if(!Files.exists(runPath)) {
+            if (!Files.exists(runPath)) {
                 var header = "timestamp, millis, jdbcInterfaces,jdbcToJava, basicJdbc,globalJdbc,localJdbc, basicJava,globalJava,localJava, hashJdbc, state\n";
                 Files.writeString(runPath, header, StandardOpenOption.CREATE_NEW);
             }
@@ -215,7 +218,7 @@ public final class Processor extends AbstractProcessor {
             }
             return sb.toString();
         } catch (Exception e) {
-            throw new ProcessorException(e);
+            throw new RuntimeException(e);
         }
     }
 }

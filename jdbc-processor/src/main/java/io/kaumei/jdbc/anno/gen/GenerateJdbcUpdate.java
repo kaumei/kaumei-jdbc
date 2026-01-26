@@ -53,9 +53,9 @@ public class GenerateJdbcUpdate implements GenerateJdbc {
 
     @Override
     public MethodSpec generateMethod() {
-        //this.logger.debug("---- JdbcUpdate ----", "iface", this.parent.type().getSimpleName(), "method", method.getSimpleName());
+        this.logger.debug("---- JdbcUpdate ----", "method", method, "returnType", method.getReturnType());
         var sqlUpdate = methodAnnotations.jdbcUpdate();
-        if(sqlUpdate.isEmpty()) {
+        if (sqlUpdate.isEmpty()) {
             methodBuilder.body().addError(Msg.of("@JdbcUpdate must provide a SQL string"));
             return this.build(sqlUpdate);
         }
@@ -64,9 +64,9 @@ public class GenerateJdbcUpdate implements GenerateJdbc {
 
         var returnType = genService.returnType(method, methodAnnotations);
         var returnTypeKind = returnType.type().getKind();
-        if(methodAnnotations.hasAnnotation(Anno.JDBC_RETURN_GENERATED_VALUES)) {
+        if (methodAnnotations.hasAnnotation(Anno.JDBC_RETURN_GENERATED_VALUES)) {
             updateReturning(returnType, sql);
-        } else if(returnTypeKind == TypeKind.VOID
+        } else if (returnTypeKind == TypeKind.VOID
                 || returnTypeKind == TypeKind.INT
                 || returnTypeKind == TypeKind.BOOLEAN) {
             updateSimple(sql);
@@ -78,6 +78,7 @@ public class GenerateJdbcUpdate implements GenerateJdbc {
     }
 
     private void updateSimple(SqlParser.Result sql) {
+        this.logger.debug("updateSimple", sql);
         var body = methodBuilder.body();
         body.beginControlFlow("try");
         body.addStatement("var con = supplier.getConnection()");
@@ -101,9 +102,10 @@ public class GenerateJdbcUpdate implements GenerateJdbc {
     }
 
     private void updateReturning(GenerateService.MethodReturn result, SqlParser.Result sql) {
+        this.logger.debug("updateReturning", "result", result, "sql", sql);
         var body = methodBuilder.body();
 
-        if(result.kind().isVoid()
+        if (result.kind().isVoid()
                 || genService.types.isKaumeiJdbcBatch(result.type())
                 || !result.kind().isPrimitive() && !result.kind().isObject()
         ) {
@@ -114,10 +116,10 @@ public class GenerateJdbcUpdate implements GenerateJdbc {
             //  body.addError(Msg.returnTypeNotSupported(JdbcReturnGeneratedValues.class,result.type()));
         }
         var optReason = result.optional().checkNonNullOrUnspecific();
-        if(optReason != null) {
+        if (optReason != null) {
             body.addError(Msg.returnTypeOptional(optReason));
         }
-        if(body.hasErrors()) {
+        if (body.hasErrors()) {
             return;
         }
 

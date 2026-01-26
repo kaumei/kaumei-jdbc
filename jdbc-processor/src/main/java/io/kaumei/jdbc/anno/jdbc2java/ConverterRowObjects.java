@@ -9,6 +9,7 @@ import com.palantir.javapoet.CodeBlock;
 import io.kaumei.jdbc.anno.OptionalFlag;
 import io.kaumei.jdbc.anno.gen.KaumeiMethodBodyBuilder;
 import io.kaumei.jdbc.anno.msg.Msg;
+import io.kaumei.jdbc.anno.store.Converter;
 import io.kaumei.jdbc.anno.store.SearchKey;
 
 import javax.lang.model.element.Element;
@@ -16,6 +17,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.type.TypeMirror;
+import java.util.Objects;
 
 class ConverterRowObjects extends Jdbc2JavaConverter {
 
@@ -46,6 +48,20 @@ class ConverterRowObjects extends Jdbc2JavaConverter {
         for (int i = 0; i < this.paramLength; i++) {
             this.paramNames[i] = method.getParameters().get(i).getSimpleName().toString();
         }
+    }
+
+    @Override
+    public boolean isSame(Converter o) {
+        return o instanceof ConverterRowObjects c
+                && Objects.equals(type, c.type)
+                && isMethod == c.isMethod
+                && Objects.equals(typeElement, c.typeElement)
+                && Objects.equals(methodName, c.methodName)
+                && paramLength == c.paramLength
+                && Objects.deepEquals(jdbcNames, c.jdbcNames)
+                && Objects.deepEquals(paramSearchKeys, c.paramSearchKeys)
+                && Objects.deepEquals(paramNames, c.paramNames)
+                && Objects.deepEquals(isNonnull, c.isNonnull);
     }
 
     // ------------------------------------------------------------------------

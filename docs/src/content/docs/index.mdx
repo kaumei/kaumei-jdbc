@@ -1,19 +1,25 @@
 ---
 title: Welcome to Kaumei JDBC
 tableOfContents: false
+description: "A lightweight Java library for SQL-first JDBC with compile-time checking."
 ---
 import { Card, CardGrid } from '@astrojs/starlight/components';
 import Link from '../../components/Link.astro';
 
-**Kaumei&nbsp;JDBC** aims to give you the control of hand-written SQL with better safety,
+**Kaumei&nbsp;JDBC** gives you the control of hand-written SQL with better safety,
 ergonomics, and observability than heavier frameworks.
-It keeps SQL front and center while compiling the boring JDBC plumbing for you.
+It keeps SQL front and in focus while compiling the boring JDBC plumbing for you.
+This tool is focused on practical, predictable database access for developers
+who prefer SQL-centric workflows.
+
 If you cannot wait, start right away with the <Link ref="/intro/installation">installation guide</Link>.
-More context before adopting is provided in <Link ref="/intro/why-kaumei">Why **Kaumei&nbsp;JDBC**</Link>.
+More context before adoption is provided in <Link ref="/intro/introduction">Introduction</Link>.
+More details can be found in <Link ref="/intro/why-kaumei">Why **Kaumei&nbsp;JDBC**</Link>
+
 
 <CardGrid>
 	<Card title="Compile-time checks" icon="approve-check">
-		Annotation processing generates DAO implementations and validates bindings up front.
+		Annotation processing generates the JDBC boilerplate code and validates bindings up front.
 	</Card>
 	<Card title="SQL-first workflow" icon="terminal">
 		`@JdbcSelect`, `@JdbcUpdate`, `@JdbcBatch`, and `@JdbcNative` keep queries inline and reviewable.

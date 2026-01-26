@@ -12,6 +12,7 @@ import io.kaumei.jdbc.annotation.JdbcUpdate;
 import io.kaumei.jdbc.annotation.JdbcUpdateBatch;
 import io.kaumei.jdbc.annotation.config.JdbcBatchSize;
 import io.kaumei.jdbc.annotation.config.JdbcQueryTimeout;
+import io.kaumei.jdbc.docs.SimpleExample;
 import io.kaumei.jdbc.impl.JdbcBatchImpl;
 import io.kaumei.jdbc.spec.db.DbCustomer;
 import org.jspecify.annotations.NonNull;
@@ -35,8 +36,8 @@ public interface UpdateBatchSpec {
     // ------------------------------------------------------------------------
 
     interface BatchOne extends JdbcBatch {
-        @JdbcUpdate("INSERT INTO db_customers (name,budge) values (:name,:budge)")
-        void insertAndReturnVoid(String name, Integer budge);
+        @JdbcUpdate("INSERT INTO db_customers (name,budge,pricing_plan) values (:name,:budge,:plan)")
+        void insertAndReturnVoid(String name, Integer budge, SimpleExample.PricingPlan plan);
     }
 
     // ------------------------------------------------------------------------

@@ -83,6 +83,8 @@ public abstract class Store<T extends Converter> {
         T old = this.map.put(key, value);
         if (old == null) {
             return value;
+        } else if (!old.hasMessages() && old.isSame(value)) {
+            return value;
         }
         // duplicate detected
         var newEntry = createInvalidConverter(MsgSet.merge(old.messages(), value.messages(), Msg.DUPLICATE_KEY));

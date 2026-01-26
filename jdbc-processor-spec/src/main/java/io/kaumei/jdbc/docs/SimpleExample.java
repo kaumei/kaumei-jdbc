@@ -10,6 +10,8 @@ import io.kaumei.jdbc.annotation.JdbcSelect;
 import io.kaumei.jdbc.annotation.JdbcToJava;
 import io.kaumei.jdbc.annotation.JdbcUpdate;
 import io.kaumei.jdbc.annotation.config.JdbcReturnGeneratedValues;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,16 +20,24 @@ import java.util.stream.Stream;
 // @part:class
 public interface SimpleExample {
 
+    // @part:PricingPlan
+    enum PricingPlan {
+        FREE, BASIC, PRO, ENTERPRISE
+    }
+    // @part:PricingPlan
+
     /**
      * A record which will hold one row of the table.
      */
     // @part:CustomerAsRecord
     record CustomerAsRecord(long id,
-                            @JdbcName("name") String firstName,
-                            @org.jspecify.annotations.Nullable Integer budge,
-                            LocalDateTime created) {
+                            String name,
+                            @Nullable Integer budge,
+                            @JdbcName("pricing_plan") @NonNull PricingPlan plan,
+                            @JdbcName("created_at") LocalDateTime created) {
     }
     // @part:CustomerAsRecord
+
 
     /**
      * A class which can also hold one row of the table.
@@ -35,32 +45,39 @@ public interface SimpleExample {
     // @part:CustomerAsClass
     class CustomerAsClass {
         private final long id;
-        private final String firstName;
-        private final @org.jspecify.annotations.Nullable Integer budge;
+        private final String name;
+        private final @Nullable Integer budge;
+        private final @NonNull PricingPlan plan;
         private final LocalDateTime created;
 
         CustomerAsClass(long id,
-                        @JdbcName("name") String firstName,
-                        @org.jspecify.annotations.Nullable Integer budge,
-                        LocalDateTime created) {
+                        String name,
+                        @Nullable Integer budge,
+                        @JdbcName("pricing_plan") @NonNull PricingPlan plan,
+                        @JdbcName("created_at") LocalDateTime created) {
             this.id = id;
-            this.firstName = firstName;
+            this.name = name;
             this.budge = budge;
+            this.plan = plan;
             this.created = created;
         }
+
         // ...
         // @part:CustomerAsClass
-
         public long getId() {
             return this.id;
         }
 
-        public String getFirstName() {
-            return this.firstName;
+        public String getName() {
+            return this.name;
         }
 
-        public @org.jspecify.annotations.Nullable Integer getBudge() {
+        public @Nullable Integer getBudge() {
             return this.budge;
+        }
+
+        public @NonNull PricingPlan getPlan() {
+            return this.plan;
         }
 
         public LocalDateTime getCreated() {
@@ -97,7 +114,7 @@ public interface SimpleExample {
      * The database generated values.
      */
     // @part:Gen
-    record CustomerGen(long id, @JdbcName("created") LocalDateTime createdDateTime) {
+    record CustomerGen(long id, @JdbcName("created_at") LocalDateTime createdDateTime) {
     }
     // @part:Gen
 
@@ -107,9 +124,9 @@ public interface SimpleExample {
      * To get those values back we define a record CustomerGen and add the @JdbcReturnGeneratedValues annotation
      */
     // @part:insert
-    @JdbcUpdate("INSERT INTO db_customers (name, budge) VALUES (:name, :budge)")
+    @JdbcUpdate("INSERT INTO db_customers (name, budge, pricing_plan) VALUES (:name, :budge, :plan)")
     @JdbcReturnGeneratedValues
-    CustomerGen insertCustomer(String name, @org.jspecify.annotations.Nullable Integer budge);
+    CustomerGen insertCustomer(String name, @Nullable Integer budge, @NonNull PricingPlan plan);
     // @part:insert
 
     /*

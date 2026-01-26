@@ -6,13 +6,13 @@
 package io.kaumei.jdbc.spec3.config;
 
 import io.kaumei.jdbc.DatasourceExtension;
+import io.kaumei.jdbc.docs.SimpleExample;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,7 +38,7 @@ class StatementInterfaceSpecTest {
         var created = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS);
 
         // when
-        var id = service.insert(name, created);
+        var id = service.insert(name, SimpleExample.PricingPlan.FREE, created);
         var customer = service.selectById(id.id());
 
         // when

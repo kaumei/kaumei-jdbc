@@ -5,6 +5,8 @@
     <file url="file://$PROJECT_DIR$/jdbc-annotation/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/jdbc-core/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/jdbc-core/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jdbc-integration-spring/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jdbc-integration-spring/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/jdbc-integration/jdbc-spring-jpa/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/jdbc-integration/jdbc-spring-jpa/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/jdbc-integration/jdbc-spring-kaumei/src/main/java" charset="UTF-8" />

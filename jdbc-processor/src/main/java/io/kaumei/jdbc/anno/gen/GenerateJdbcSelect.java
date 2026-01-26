@@ -57,12 +57,11 @@ class GenerateJdbcSelect implements GenerateJdbc {
 
     @Override
     public MethodSpec generateMethod() {
-        String methodStr = this.parent.type().getSimpleName() + "." + method.getSimpleName() + ":" + method.getReturnType();
-        this.logger.debug("---- JdbcSelect ---- ", methodStr);
+        this.logger.debug("---- JdbcSelect ---- ", "method", method, "returnType", method.getReturnType());
 
         var sqlSelect = methodAnnotations.jdbcSelect();
         // sanity-check:on
-        if(sqlSelect.isEmpty()) {
+        if (sqlSelect.isEmpty()) {
             methodBuilder.body().addError(Msg.of("@JdbcSelect must provide a SQL string"));
             return this.build(sqlSelect);
         }
@@ -70,13 +69,13 @@ class GenerateJdbcSelect implements GenerateJdbc {
 
         var returnType = genService.returnType(method, methodAnnotations);
         this.logger.debug("returnType", returnType);
-        if(returnType.hasMessages() || this.methodParameters.hasMessages()) {
+        if (returnType.hasMessages() || this.methodParameters.hasMessages()) {
             this.methodBuilder.body().addError(returnType.messages());
             this.methodBuilder.body().addError(methodParameters.messages());
             return this.build(sqlSelect);
         }
 
-        if(returnType.kind().isVoid()) {
+        if (returnType.kind().isVoid()) {
             this.methodBuilder.body().addError(Msg.returnTypeNotSupported(method.getReturnType()));
             return this.build(sqlSelect);
         }
@@ -93,6 +92,7 @@ class GenerateJdbcSelect implements GenerateJdbc {
                 selectStreamIterableResultSet(sql, returnType);
                 break;
             default:
+                String methodStr = this.parent.type().getSimpleName() + "." + method.getSimpleName() + ":" + method.getReturnType();
                 throw new ProcessorException(methodStr + ": illegal kind:" + returnType.kind()); // sanity-check
         }
 
@@ -118,7 +118,7 @@ class GenerateJdbcSelect implements GenerateJdbc {
         body.addIfAnnotationIsPresent("stmt.setQueryTimeout($L)", queryTimeout);
 
         var noMoreRows = genService.jdbcConfigService.searchAnno(Anno.JDBC_NO_MORE_ROWS, this.methodAnnotations, method.getEnclosingElement());
-        if(noMoreRows == JdbcNoMoreRows.Kind.THROW_EXCEPTION) {
+        if (noMoreRows == JdbcNoMoreRows.Kind.THROW_EXCEPTION) {
             body.addStatement("stmt.setFetchSize(2)");
             body.addStatement("stmt.setMaxRows(2)");
         } else {
@@ -128,17 +128,17 @@ class GenerateJdbcSelect implements GenerateJdbc {
         body.beginControlFlow("try (var rs = stmt.executeQuery())");
 
         var noRows = genService.jdbcConfigService.searchAnno(Anno.JDBC_NO_ROWS, this.methodAnnotations, this.method.getEnclosingElement());
-        if(noRows == JdbcNoRows.Kind.RETURN_NULL && methodReturn.optional().isNonNull()) {
+        if (noRows == JdbcNoRows.Kind.RETURN_NULL && methodReturn.optional().isNonNull()) {
             body.addError(Msg.of("@JdbcSelect incompatible: " + noRows + " and '" + methodReturn.optional() + "'"));
         } else {
             body.addCheckHasRows(noRows, methodReturn.optional());
         }
 
-        if(body.hasErrors()) {
+        if (body.hasErrors()) {
             return;
         }
         body.converter(converter, "result", methodAnnotations, methodReturn.optional());
-        if(body.hasErrors()) {
+        if (body.hasErrors()) {
             body.addError(Msg.invalidConverter(methodReturn.searchKey()));
         }
 
@@ -236,13 +236,13 @@ class GenerateJdbcSelect implements GenerateJdbc {
     // -----------------------------------------------------------------
 
     private CodeBlock prepareStatement(GenerateService.@Nullable AnnoCode resultSetType, GenerateService.@Nullable AnnoCode resultSetConcurrency) {
-        if(resultSetType == null && resultSetConcurrency == null) {
+        if (resultSetType == null && resultSetConcurrency == null) {
             return CodeBlock.of("con.prepareStatement(sql)");
-        } else if(resultSetType != null && resultSetConcurrency != null) {
-            if(resultSetType.check() != null) {
+        } else if (resultSetType != null && resultSetConcurrency != null) {
+            if (resultSetType.check() != null) {
                 methodBuilder.body().addCodeBlock(resultSetType.check());
             }
-            if(resultSetConcurrency.check() != null) {
+            if (resultSetConcurrency.check() != null) {
                 methodBuilder.body().addCodeBlock(resultSetConcurrency.check());
             }
             return CodeBlock.of("con.prepareStatement(sql, $L.sqlMagicNumber(), $L.sqlMagicNumber())",
@@ -254,24 +254,24 @@ class GenerateJdbcSelect implements GenerateJdbc {
 
     private CodeBlock sqlToCodeBlock(SqlParser.Result sql) {
         var code = CodeBlock.builder();
-        if(!this.methodParameters.hasCollections()) {
+        if (!this.methodParameters.hasCollections()) {
             code.add("$S", sql.nativeSql());
         } else {
             var index = 0;
             for (var entry : sql.index2name()) {
                 var name = entry.name();
                 var param = this.methodParameters.parameterMap().get(name);
-                if(!param.kind().isArray() && !param.kind().isList()) {
+                if (!param.kind().isArray() && !param.kind().isList()) {
                     continue;
                 }
-                if(index == 0) {
+                if (index == 0) {
                     code.add("$S", sql.nativeSql().substring(index, entry.pos()));
                 } else {
                     code.add(" + $S", sql.nativeSql().substring(index, entry.pos()));
                 }
-                if(param.kind().isArray()) {
+                if (param.kind().isArray()) {
                     code.add(" + $L", KaumeiLib.marks(CodeBlock.of("$L.length", KaumeiLib.requireNonNull(name))));
-                } else if(param.kind().isList()) {
+                } else if (param.kind().isList()) {
                     code.add(" + $L", KaumeiLib.marks(CodeBlock.of("$L.size()", KaumeiLib.requireNonNull(name))));
                 }
                 index = entry.pos() + 1;

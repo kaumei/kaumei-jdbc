@@ -6,12 +6,14 @@
 package io.kaumei.jdbc.anno.jdbc2java;
 
 import io.kaumei.jdbc.anno.gen.KaumeiMethodBodyBuilder;
+import io.kaumei.jdbc.anno.store.Converter;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.type.TypeMirror;
+import java.util.Objects;
 
 class ConverterRowResultSet extends Jdbc2JavaConverter {
 
@@ -26,6 +28,14 @@ class ConverterRowResultSet extends Jdbc2JavaConverter {
         this.methodName = method.getSimpleName();
     }
 
+    @Override
+    public boolean isSame(Converter o) {
+        return o instanceof ConverterRowResultSet c
+                && Objects.equals(type, c.type)
+                && isMethod == c.isMethod
+                && Objects.equals(typeElement, c.typeElement)
+                && Objects.equals(methodName, c.methodName);
+    }
     // ------------------------------------------------------------------------
 
     @Override

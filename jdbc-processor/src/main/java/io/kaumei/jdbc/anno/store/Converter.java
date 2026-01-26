@@ -24,7 +24,7 @@ public class Converter {
 
     // ------------------------------------------------------------------------
 
-    private final @Nullable TypeMirror type;
+    protected final @Nullable TypeMirror type;
     private final MsgSet messages;
 
     protected Converter(TypeMirror type) {
@@ -39,6 +39,10 @@ public class Converter {
         // sanity-check:off
         this.type = type;
         this.messages = messages;
+    }
+
+    public boolean isSame(Converter c) {
+        return false;
     }
 
     public boolean hasType() {

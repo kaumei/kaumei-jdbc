@@ -8,10 +8,11 @@ CREATE TABLE db_address (
 );
 -- @part:db_customers
 CREATE TABLE db_customers (
-    id      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name    VARCHAR(255) NOT NULL,
-    budge   INTEGER,
-    created TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP
+    id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name         VARCHAR(255) NOT NULL,
+    budge        INTEGER,
+    pricing_plan VARCHAR(10) NOT NULL,
+    created_at   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP
 );
 -- @part:db_customers
 

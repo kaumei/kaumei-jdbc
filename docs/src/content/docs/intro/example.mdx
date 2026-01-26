@@ -1,5 +1,5 @@
 ---
-title: Example
+title: Simple example
 description: A simple example for Kaumei JDBC
 ---
 import { Code } from '@astrojs/starlight/components';
@@ -9,20 +9,53 @@ import sqlCode  from '/root/jdbc-processor-spec/src/main/resources/h2_create_db.
 import javaCode from '/root/jdbc-processor-spec/src/main/java/io/kaumei/jdbc/docs/SimpleExample.java?raw';
 import testCode from '/root/jdbc-processor-spec/src/test/java/io/kaumei/jdbc/docs/SimpleExampleTest.java?raw';
 
-## Create the SQL table
-Create a simple `customer` table in your database.
-<Code code={extractCodePart(sqlCode, "db_customers")} lang="sql" title='customer.sql'/>
 
+This page shows typical database access patterns with **Kaumei&nbsp;JDBC**.
+Learn how to define models, run queries, and integrate generated code.
+They are intentionally minimal and focus on structure rather than full
+application setup.
 
-## Define the row data
-Define a record to hold one row of the table.
-If your Java names do not match the SQL names, use the `@JdbcName` annotation to map them to SQL names.
-<Code code={extractCodePart(javaCode, "CustomerAsRecord")} lang="java" />
+We will address the following things
+
+* Setup a simple database table
+* Define the domain model
+* Simple SELECT query
+* Simple INSERT INTO query
+* How to use it
+
 
 **Kaumei&nbsp;JDBC** performs null checks in line with [JSpecify](https://jspecify.dev).
+This example will use the following annotations:
+* `@org.jspecify.annotations.Nullable`:  variable may contain `null`s
+* `@org.jspecify.annotations.NonNull`: variable must not contain `null`s
 
-If you define plain Java classes:
+
+## Create the SQL table
+For this example we define a simple table to store a customer, with
+* auto generated columns
+* mandatory columns
+* optional columns
+* columns which which Java type will differ from the JDBC type
+
+<Code code={extractCodePart(sqlCode, "db_customers")} lang="sql" title='customer.sql'/>
+
+## Domain model
+
+The domain model will be used to get data into the database or from it back.
+
+For the `pricing_plan` we will use a Java enum.
+<Code code={extractCodePart(javaCode, "PricingPlan")} lang="java" />
+
+We define a record to hold one row of the table.
+If your Java names do not match the SQL names, use the `@JdbcName`
+annotation to map them to SQL names.
+<Code code={extractCodePart(javaCode, "CustomerAsRecord")} lang="java" />
+
+The tool is not limited to `record`s, so we define prallel the same as a plain old Java class:
 <Code code={extractCodePart(javaCode, "CustomerAsClass")} lang="java" />
+
+The `plan` property uses a Java enum, for which we use the **Kaumei&nbsp;JDBC** default
+mapping, which is the name of the enum as string.
 
 The `created` property uses `LocalDateTime`, which JDBC does not handle natively.
 Add a converter to translate between `java.sql.Timestamp` and `java.time.LocalDateTime`.
@@ -30,30 +63,35 @@ You can use any name as converter method.
 <Code code={extractCodePart(javaCode, "LocalDateTime")} lang="java" />
 
 
-## Define the select statements
-Return the table contents as a `List` or a `Stream`.
-See the <Link ref="/guides/spec/jdbc-select">select guide</Link> for more details.
+## Simple SELECT query
+Demonstrates retrieving multiple rows and streaming results.
+Now we see two basic examples of executing a query and mapping rows to domain types.
+
+To return the table contents as a `List` or a `Stream`.
 <Code code={extractCodePart(javaCode, "select")} lang="java" />
 
 You can also return a single scalar value:
 <Code code={extractCodePart(javaCode, "countCustomers")} lang="java" />
 
+See the <Link ref="/guides/spec/jdbc-select">select guide</Link> for more details.
 
-## Insert data
-The table defines two auto generated columns that you want to return from each insert.
-Create a record to capture those generated values.
-In this case the SQL and Java field names match.
+## Simple INSERT INTO query
+
+Demonstrates type-safe parameter binding and reuse of prepared statements.
+
+The table defines two auto generated columns that we want to be returned from each insert.
+
+First we have to create a record to capture those generated values. 
+In this case the SQL and Java field names will match, to keep the example simple.
 <Code code={extractCodePart(javaCode, "Gen")} lang="java" />
 
-Next, define the insert SQL.
-See the <Link ref="/guides/spec/jdbc-update">update guide</Link> for further details.
+Next, we define the insert SQL.
 <Code code={extractCodePart(javaCode, "insert")} lang="java" />
 
+The method parameters are bind to there placeholders in this case to `:name` and  `:budge`.
 
-## The full example
-Combine all components into a single Java interface:
-<Code code={extractCodePart(javaCode, "class")} lang="java" title='SimpleExample.java'/>
-
+See the <Link ref="/guides/spec/jdbc-update">JDBC update</Link> section of the spec for further details.
+See the <Link ref="/guides/spec/param-binding">Parameter Binding</Link> section of the spec for further details.
 
 ## How to use it
 The annotation processor generates the implementation `SimpleExampleJdbc` alongside the interface.
@@ -64,3 +102,8 @@ Create an instance and call the generated methods:
 The example uses a minimal `JdbcConnectionProvider`.
 To integrate with frameworks such as Spring, Micronaut, or Quarkus,
 see the <Link ref="/guides/integration/00-overview">integration overview</Link>.
+
+
+## The full interface code
+Combine all components into a single Java interface:
+<Code code={extractCodePart(javaCode, "class")} lang="java" title='SimpleExample.java'/>

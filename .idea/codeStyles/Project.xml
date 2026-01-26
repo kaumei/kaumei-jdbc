@@ -13,7 +13,6 @@
     </SqlCodeStyleSettings>
     <codeStyleSettings language="JAVA">
       <option name="RIGHT_MARGIN" value="100" />
-      <option name="SPACE_BEFORE_IF_PARENTHESES" value="false" />
     </codeStyleSettings>
     <codeStyleSettings language="Markdown">
       <indentOptions>

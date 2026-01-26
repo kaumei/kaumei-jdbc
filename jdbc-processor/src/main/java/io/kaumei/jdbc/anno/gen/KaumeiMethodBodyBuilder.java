@@ -158,6 +158,7 @@ public class KaumeiMethodBodyBuilder {
     // ------------------------------------------------------------------------
 
     void processParameter(SqlParser.Result sql, GenerateService.MethodParameters methodParameters) {
+        this.logger.debug("processParameter", methodParameters);
         var hasCollections = methodParameters.hasCollections();
         if (hasCollections) {
             this.addStatement("var index = 1");

@@ -23,15 +23,13 @@ class JavaAnnoMessengerTest {
 
     private final static Exception exp = new Exception("exp");
     @Mock
-    private JavaAnnoElements elements;
-    @Mock
     private ProcessingEnvironment env;
 
     private JavaAnnoMessenger logger;
 
     @BeforeEach
     void beforeEach() {
-        logger = new JavaAnnoMessenger(env, elements);
+        logger = new JavaAnnoMessenger(env);
     }
 
     @Test

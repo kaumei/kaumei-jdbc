@@ -22,7 +22,7 @@ import java.sql.Statement;
 
 import static java.util.Objects.requireNonNull;
 
-public class DatasourceExtension implements BeforeAllCallback, BeforeEachCallback, AfterAllCallback {
+public class DatasourceExtension implements BeforeAllCallback, BeforeEachCallback, AfterAllCallback,JdbcConnectionProvider {
 
     private final static ExtensionContext.Namespace NS = ExtensionContext.Namespace.create(DatasourceExtension.class);
 
@@ -86,14 +86,7 @@ public class DatasourceExtension implements BeforeAllCallback, BeforeEachCallbac
 
     }
 
-    DBType dbType() {
-        return dbType;
-    }
-
-    public DataSource dataSource() {
-        return requireNonNull(ds);
-    }
-
+    @Override
     public Connection getConnection() {
         try {
             if (con == null || con.isClosed()) {
@@ -103,6 +96,14 @@ public class DatasourceExtension implements BeforeAllCallback, BeforeEachCallbac
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+    }
+
+    DBType dbType() {
+        return dbType;
+    }
+
+    public DataSource dataSource() {
+        return requireNonNull(ds);
     }
 
     public void executeSqls(String... sql) {
